@@ -1,59 +1,139 @@
-# HomecenterLabelPrintingSite
+# Impresión de Etiquetas ETQ · Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.34.
+Interfaz operativa del **Submódulo de Impresión de ETQ** (prueba técnica Homecenter ·
+Dev Experto GTL Tienda).
 
-## Development server
+Angular 20 con componentes **standalone**, estado en **signals** y una capa de
+**facades** que aísla los componentes del transporte HTTP.
 
-To start a local development server, run:
+> El backend, la documentación de arquitectura, los diagramas C4 y el runbook de
+> incidentes viven en
+> [Homecenter.Microservice.Api.LabelPrinting](https://github.com/anfegave98/Homecenter.Microservice.Api.LabelPrinting).
 
-```bash
-ng serve
-```
+---
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Ejecución local
 
 ```bash
-ng generate component component-name
+npm install && npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Queda en `http://localhost:4200`. Necesita el **API corriendo en `http://localhost:5080`**
+(ver el README del backend); ese origen ya está declarado en su configuración de CORS.
 
 ```bash
-ng generate --help
+npm test
 ```
-
-## Building
-
-To build the project run:
 
 ```bash
-ng build
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+El build sale en `dist/homecenter-labelprinting-site/browser`.
 
-## Running unit tests
+---
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Credenciales de prueba
 
-```bash
-ng test
+| Usuario | Contraseña | Puede |
+|---|---|---|
+| `operario.tienda` | `Operario123*` | Imprimir y ver **su propio** historial |
+| `supervisor.tienda` | `Supervisor123*` | Además: reimprimir con motivo, ver todo el historial |
+| `admin.tienda` | `Admin123*` | Además: indicadores operativos |
+
+---
+
+## Pantallas
+
+**`/impresion`** — formulario (LPN, zona, usuario), preview de la ETQ con sus productos
+y disponibilidad, y resultado como banner de **Éxito / Rechazo + motivo** con badge
+`Impresión` o `Reimpresión`.
+
+**`/historial`** — filtros por LPN, zona, usuario, resultado, tipo de evento y rango de
+fechas, con paginación. Tabla en escritorio, tarjetas en móvil.
+
+Ambas exigen sesión (`authGuard`).
+
+---
+
+## Estructura
+
+```
+src/app/
+├── auth/
+│   ├── components/login/
+│   ├── facades/                 AuthFacade — estado de sesión en signals
+│   ├── guards/                  authGuard · roleGuard (functional)
+│   ├── interceptors/            jwtInterceptor · errorInterceptor
+│   └── services/                AuthService · TokenStorageService
+├── printing/
+│   ├── components/              print-form · label-preview · print-result
+│   │                            history-filters · history-table · páginas
+│   ├── facades/                 PrintingFacade · HistoryFacade
+│   ├── models/                  interfaces alineadas 1:1 con los DTOs del backend
+│   └── services/                PrintingService · CatalogService
+└── shared/
+    ├── ui/                      alert · badge · spinner · empty-state · pagination
+    ├── models/                  ApiResponse<T>
+    └── utils/                   crypto.util.ts
 ```
 
-## Running end-to-end tests
+---
 
-For end-to-end (e2e) testing, run:
+## Tres decisiones que conviene conocer
 
-```bash
-ng e2e
-```
+### El rechazo de negocio no pasa por el interceptor de errores
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Un rechazo de regla llega como **HTTP 200 con `success: false`**. Rechazar una impresión
+por falta de inventario no es un error técnico, y mezclarlos haría que la interfaz
+mostrara *"algo salió mal"* cuando el sistema funcionó correctamente.
 
-## Additional Resources
+Por eso `PrintingService.print()` devuelve el **envelope completo** en lugar de
+desenvolver `data`: el motivo del rechazo vive en `error`, y desenvolver ahí borraría
+justo lo que el operario necesita ver.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### El campo Usuario es de solo lectura
+
+Se llena desde el JWT. Si el operario pudiera escribirlo, la auditoría dejaría de ser un
+control y pasaría a ser un campo de texto libre.
+
+Por la misma lógica, `AuthFacade.canReprint()` solo decide qué mostrar. **La
+autorización vinculante es la del backend**, y el historial de un operario se restringe
+allá, no ocultando filas aquí.
+
+### El cifrado del payload es una capa adicional, no un reemplazo de HTTPS
+
+`crypto.util.ts` cifra las credenciales con AES-256-CBC (Web Crypto), interoperable con
+el backend. **La llave viaja dentro del bundle**, así que cualquiera puede leerla: frente
+a un atacante que ya intercepta el tráfico no agrega secreto — eso lo aporta HTTPS. Lo
+que sí evita es que las credenciales queden en claro en registros intermedios.
+
+Viene **apagado por defecto** (`encryptCredentials: false`) y debe coincidir con
+`Encryption:Enabled` del backend: encendido de un solo lado, el login responde 400.
+
+---
+
+## Configuración
+
+`src/environments/environment.production.ts` fija el `apiUrl`, y se resuelve **en tiempo
+de build**: la URL definitiva del API debe conocerse antes de publicar.
+
+`public/_redirects` (`/* /index.html 200`) hace que una recarga en `/historial` no
+devuelva 404 en Cloudflare Pages.
+
+---
+
+## Manejo de errores
+
+El `errorInterceptor` traduce cada fallo a un mensaje accionable:
+
+| Situación | Qué ve el usuario |
+|---|---|
+| Sin respuesta (`0`) | Aviso de que el servidor puede estar reactivándose — el plan gratuito de Render suspende por inactividad |
+| `401` | Se limpia la sesión y se redirige a `/login?expired=true` |
+| `403` | "Tu rol no tiene permiso para ejecutar esta acción" |
+| `429` | Los **segundos concretos** a esperar, leídos del header `Retry-After` |
+| `5xx` | Mensaje controlado **+ el `correlationId`**, que es lo único citable ante soporte |
+
+Cuando el backend envía su propio mensaje en el envelope, se respeta ese en lugar del
+genérico.

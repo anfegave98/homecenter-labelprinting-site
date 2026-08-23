@@ -147,8 +147,10 @@ Viene **apagado por defecto** (`encryptCredentials: false`) y debe coincidir con
 `src/environments/environment.production.ts` fija el `apiUrl`, y se resuelve **en tiempo
 de build**: la URL definitiva del API debe conocerse antes de publicar.
 
-`public/_redirects` (`/* /index.html 200`) hace que una recarga en `/historial` no
-devuelva 404 en Cloudflare Pages.
+`wrangler.jsonc` declara `not_found_handling: "single-page-application"`, que hace que
+una recarga en `/historial` entregue `index.html` en vez de un 404. En Cloudflare
+Workers eso reemplaza al `_redirects` de Pages: mantener ambos rompe el despliegue,
+porque la regla `/* /index.html 200` se detecta como bucle infinito.
 
 ---
 

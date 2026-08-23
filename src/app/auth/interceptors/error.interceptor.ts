@@ -7,6 +7,9 @@ import { catchError } from 'rxjs/operators';
 import { ApiError, ApiResponse } from '../../shared/models/api-response.model';
 import { TokenStorageService } from '../services/token-storage.service';
 
+/** Header con el que el backend identifica cada solicitud. */
+const CORRELATION_HEADER = 'X-Correlation-Id';
+
 /**
  * Traduce los fallos HTTP a un `ApiError` con mensaje presentable.
  *
@@ -31,10 +34,31 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
         void router.navigate(['/login'], { queryParams: { expired: true } });
       }
 
-      return throwError(() => backendError ?? buildError(response));
+      const error = backendError ?? buildError(response);
+
+      return throwError(() => withCorrelationId(error, response));
     })
   );
 };
+
+/**
+ * Adjunta el identificador de correlacion al mensaje de un fallo tecnico.
+ *
+ * Sin esto el identificador existe en el log del servidor pero nadie puede citarlo:
+ * el operario reportaria "no me dejo imprimir" y el soporte tendria que buscar por
+ * hora aproximada. Solo se agrega a fallos inesperados; en un 403 o un 429 el usuario
+ * ya sabe que paso y el codigo no le aporta nada.
+ */
+function withCorrelationId(error: ApiError, response: HttpErrorResponse): ApiError {
+  const shouldAttach = response.status === 0 || response.status >= 500;
+  const correlationId = response.headers?.get(CORRELATION_HEADER);
+
+  if (!shouldAttach || !correlationId) {
+    return error;
+  }
+
+  return { ...error, message: `${error.message} (referencia: ${correlationId})` };
+}
 
 /** Construye un mensaje entendible cuando el backend no alcanzo a responder. */
 function buildError(response: HttpErrorResponse): ApiError {
@@ -58,14 +82,24 @@ function buildError(response: HttpErrorResponse): ApiError {
     case 404:
       return { code: 'NOT_FOUND', message: 'El recurso solicitado no existe.' };
     case 429:
-      return {
-        code: 'RATE_LIMITED',
-        message: 'Se supero el limite de solicitudes. Espera un momento antes de reintentar.'
-      };
+      return { code: 'RATE_LIMITED', message: buildRateLimitMessage(response) };
     default:
       return {
         code: 'UNEXPECTED_ERROR',
         message: 'Ocurrio un error inesperado al procesar la solicitud.'
       };
   }
+}
+
+/**
+ * Usa el header `Retry-After` para decir cuanto esperar.
+ * Un "intenta mas tarde" sin cifra invita a reintentar de inmediato, que es
+ * justamente lo que agrava la rafaga que el limite esta conteniendo.
+ */
+function buildRateLimitMessage(response: HttpErrorResponse): string {
+  const retryAfter = Number(response.headers?.get('Retry-After'));
+
+  return Number.isFinite(retryAfter) && retryAfter > 0
+    ? `Se superó el límite de solicitudes. Reintenta en ${retryAfter} segundos.`
+    : 'Se superó el límite de solicitudes. Espera un momento antes de reintentar.';
 }

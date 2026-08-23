@@ -80,6 +80,35 @@ src/app/
 
 ---
 
+## Por qué no se partió de la plantilla base
+
+La prueba entrega `PLANTILLA_BASE_ANGULAR_FRONT_APPS_2025`, cuyo uso no es obligatorio.
+
+Esa plantilla es un **micro-frontend del Hub de Proveedores** y su documentación es
+explícita: *"No tiene login propio: recibe la sesión de la app contenedora"* mediante
+`postMessage`. Ese supuesto rompe la prueba en su punto central — **HU-01 exige
+identificar al usuario solicitante y la sección 9 pide el campo Usuario en pantalla**.
+Sin aplicación contenedora no hay sesión que heredar, y una app que espera un
+`postMessage` que nunca llega no se puede abrir para evaluarla.
+
+Su despliegue además apunta a Azure Blob Storage u OpenShift con `subscriptionKey` de
+Azure API Management; esta entrega va a Cloudflare Pages contra un API en Render.
+
+**Lo que sí se conservó de sus convenciones:** capa de servicios separada de la de
+presentación, interceptor que adjunta el Bearer token, envelope `ApiResponse` uniforme
+con `meta`, configuración por ambiente en `environments/` y Tailwind.
+
+**Dónde se divergió a conciencia:** la plantilla usa **PrimeNG** y aquí los componentes
+de `shared/ui` son propios sobre Tailwind. Para cinco componentes —alert, badge,
+spinner, empty-state, pagination— agregar una librería de UI completa habría pesado más
+que lo que resuelve. La sección 9 evalúa usabilidad, componentización, responsive,
+validaciones y manejo de errores; no la librería.
+
+También se usa **Web Crypto nativo** en lugar del `crypto-js` de la plantilla: la misma
+capacidad sin sumar una dependencia.
+
+---
+
 ## Tres decisiones que conviene conocer
 
 ### El rechazo de negocio no pasa por el interceptor de errores

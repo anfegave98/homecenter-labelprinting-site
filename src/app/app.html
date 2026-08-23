@@ -66,7 +66,11 @@
     <div class="hc-brandbar"></div>
   </header>
 
-  <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-7">
+  <!--
+    Columna flex para que una vista pueda ocupar el alto disponible y centrarse.
+    Las demas siguen apilandose desde arriba: solo se centra la que lo pide.
+  -->
+  <main class="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-6 sm:px-7">
     <router-outlet />
   </main>
 

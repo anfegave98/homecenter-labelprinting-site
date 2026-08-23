@@ -11,7 +11,19 @@ import { AuthFacade } from '../../facades/auth.facade';
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, AlertComponent],
-  templateUrl: './login.component.html'
+  templateUrl: './login.component.html',
+  styles: `
+    /*
+      El ingreso ocupa el alto disponible; la tarjeta se centra con margenes
+      automaticos y no con align-items. Si la tarjeta llega a superar el alto de la
+      ventana —pantalla corta con el aviso de sesion expirada visible— align-items
+      desbordaria hacia arriba y dejaria inalcanzable el inicio del formulario.
+    */
+    :host {
+      display: flex;
+      flex: 1;
+    }
+  `
 })
 export class LoginComponent {
   private readonly formBuilder = inject(FormBuilder);

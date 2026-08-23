@@ -53,9 +53,4 @@ export class LoginComponent {
       error: (error: ApiError) => this.error.set(error)
     });
   }
-
-  /** Rellena el formulario con un usuario de prueba documentado. */
-  protected useDemoUser(userName: string, password: string): void {
-    this.form.setValue({ userName, password });
-  }
 }

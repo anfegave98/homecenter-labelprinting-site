@@ -113,40 +113,5 @@
         }
       </button>
     </form>
-
-    <div class="flex flex-col gap-3 rounded-[11px] border-[1.5px] border-[#E3EAF2] bg-hc-surface p-4">
-      <p class="m-0 text-[11px] font-bold uppercase tracking-[0.09em] text-hc-faint">
-        Usuarios de prueba
-      </p>
-      <div class="grid gap-2">
-        <button
-          type="button"
-          class="flex flex-wrap items-center justify-between gap-2 rounded-[9px] border-[1.5px]
-                 border-transparent px-3 py-2.5 text-left transition hover:border-hc-border hover:bg-white"
-          (click)="useDemoUser('operario.tienda', 'Operario123*')"
-        >
-          <span class="text-[13.5px] font-bold text-hc-ink">operario.tienda</span>
-          <span class="text-[12.5px] text-hc-faint">Imprime; no reimprime</span>
-        </button>
-        <button
-          type="button"
-          class="flex flex-wrap items-center justify-between gap-2 rounded-[9px] border-[1.5px]
-                 border-transparent px-3 py-2.5 text-left transition hover:border-hc-border hover:bg-white"
-          (click)="useDemoUser('supervisor.tienda', 'Supervisor123*')"
-        >
-          <span class="text-[13.5px] font-bold text-hc-ink">supervisor.tienda</span>
-          <span class="text-[12.5px] text-hc-faint">Autoriza reimpresiones</span>
-        </button>
-        <button
-          type="button"
-          class="flex flex-wrap items-center justify-between gap-2 rounded-[9px] border-[1.5px]
-                 border-transparent px-3 py-2.5 text-left transition hover:border-hc-border hover:bg-white"
-          (click)="useDemoUser('admin.tienda', 'Admin123*')"
-        >
-          <span class="text-[13.5px] font-bold text-hc-ink">admin.tienda</span>
-          <span class="text-[12.5px] text-hc-faint">Consulta indicadores</span>
-        </button>
-      </div>
-    </div>
   </div>
 </div>

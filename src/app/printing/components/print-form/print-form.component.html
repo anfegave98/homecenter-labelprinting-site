@@ -1,0 +1,102 @@
+<form class="space-y-4" [formGroup]="form">
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div class="sm:col-span-2">
+      <label class="block text-sm font-medium text-slate-700" for="lpn">ETQ / LPN</label>
+      <div class="mt-1 flex gap-2">
+        <input
+          id="lpn"
+          type="text"
+          placeholder="LPN-000987654"
+          formControlName="lpn"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+        />
+        <button
+          type="button"
+          [disabled]="busy()"
+          (click)="resolve()"
+          class="shrink-0 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Consultar
+        </button>
+      </div>
+      @if (form.controls.lpn.touched && form.controls.lpn.invalid) {
+        <p class="mt-1 text-xs text-rose-600">Indica la ETQ o el LPN a imprimir.</p>
+      }
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700" for="zoneCode">Zona</label>
+      <select
+        id="zoneCode"
+        formControlName="zoneCode"
+        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+      >
+        <option value="">Zona del documento origen</option>
+        @for (zone of zones(); track zone.id) {
+          <option [value]="zone.code">{{ zone.name }} ({{ zone.code }})</option>
+        }
+      </select>
+      <p class="mt-1 text-xs text-slate-500">
+        Si no seleccionas zona, se usa la del documento origen.
+      </p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700" for="userName">Usuario</label>
+      <input
+        id="userName"
+        type="text"
+        readonly
+        [value]="userName()"
+        class="mt-1 w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600"
+      />
+      <p class="mt-1 text-xs text-slate-500">Se toma del token de sesión; no es editable.</p>
+    </div>
+  </div>
+
+  @if (requiresReprintReason()) {
+    @if (canReprint()) {
+      <div>
+        <label class="block text-sm font-medium text-slate-700" for="reprintReason">
+          Motivo de reimpresión
+        </label>
+        <textarea
+          id="reprintReason"
+          rows="2"
+          formControlName="reprintReason"
+          placeholder="Ej.: etiqueta dañada en el traslado"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+        ></textarea>
+        @if (form.controls.reprintReason.touched && form.controls.reprintReason.invalid) {
+          <p class="mt-1 text-xs text-rose-600">
+            Esta ETQ ya fue impresa: el motivo de la reimpresión es obligatorio.
+          </p>
+        }
+      </div>
+    } @else {
+      <app-alert tone="warning" title="Esta ETQ ya fue impresa">
+        Reimprimir requiere rol Supervisor o Administrador. Solicita la autorización antes de
+        continuar.
+      </app-alert>
+    }
+  }
+
+  <button
+    type="button"
+    [disabled]="busy() || !hasLabel()"
+    (click)="print()"
+    class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
+  >
+    @if (requiresReprintReason()) {
+      Reimprimir etiqueta
+    } @else {
+      Imprimir etiqueta
+    }
+  </button>
+
+  @if (!hasLabel()) {
+    <p class="text-xs text-slate-500">
+      Consulta primero la ETQ/LPN para revisar el documento y la disponibilidad.
+    </p>
+  }
+</form>

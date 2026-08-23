@@ -1,0 +1,100 @@
+<div class="mx-auto w-full max-w-md">
+  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h1 class="text-xl font-semibold text-slate-900">Ingresar</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Autentícate para consultar ETQ/LPN y registrar impresiones.
+    </p>
+
+    @if (sessionExpired()) {
+      <div class="mt-4">
+        <app-alert tone="warning">Tu sesión expiró. Ingresa nuevamente para continuar.</app-alert>
+      </div>
+    }
+
+    @if (error(); as loginError) {
+      <div class="mt-4">
+        <app-alert tone="error" title="No fue posible ingresar">{{ loginError.message }}</app-alert>
+      </div>
+    }
+
+    <form class="mt-5 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+      <div>
+        <label class="block text-sm font-medium text-slate-700" for="userName">Usuario</label>
+        <input
+          id="userName"
+          type="text"
+          autocomplete="username"
+          formControlName="userName"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+        />
+        @if (form.controls.userName.touched && form.controls.userName.invalid) {
+          <p class="mt-1 text-xs text-rose-600">El usuario es obligatorio.</p>
+        }
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700" for="password">Contraseña</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          formControlName="password"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+        />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <p class="mt-1 text-xs text-rose-600">La contraseña es obligatoria.</p>
+        }
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="auth.loading()"
+        class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+      >
+        @if (auth.loading()) {
+          Ingresando...
+        } @else {
+          Ingresar
+        }
+      </button>
+
+      @if (auth.loading()) {
+        <div class="flex justify-center">
+          <app-spinner label="Validando credenciales..." />
+        </div>
+      }
+    </form>
+  </div>
+
+  <div class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+      Usuarios de prueba
+    </p>
+    <div class="mt-2 grid gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-slate-400"
+        (click)="useDemoUser('operario.tienda', 'Operario123*')"
+      >
+        <span class="font-medium">operario.tienda</span>
+        <span class="block text-xs text-slate-500">Imprime; no puede reimprimir.</span>
+      </button>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-slate-400"
+        (click)="useDemoUser('supervisor.tienda', 'Supervisor123*')"
+      >
+        <span class="font-medium">supervisor.tienda</span>
+        <span class="block text-xs text-slate-500">Autoriza reimpresiones con motivo.</span>
+      </button>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-slate-400"
+        (click)="useDemoUser('admin.tienda', 'Admin123*')"
+      >
+        <span class="font-medium">admin.tienda</span>
+        <span class="block text-xs text-slate-500">Además consulta indicadores.</span>
+      </button>
+    </div>
+  </div>
+</div>

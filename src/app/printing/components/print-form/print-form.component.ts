@@ -1,0 +1,103 @@
+import { ChangeDetectionStrategy, Component, effect, inject, input, output } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import { AlertComponent } from '../../../shared/ui/alert.component';
+import { PrintRequestCreateDto, ZoneDto } from '../../models/printing.models';
+
+/** Datos con los que el operario pide resolver una ETQ/LPN. */
+export interface ResolveLabelRequest {
+  lpn: string;
+  zoneCode: string | null;
+}
+
+/**
+ * Formulario de impresion: LPN, zona, usuario y motivo de reimpresion.
+ *
+ * El campo Usuario existe porque la seccion 9 del enunciado lo pide en pantalla, pero
+ * es de solo lectura y se alimenta del JWT: si el operario pudiera escribirlo, la
+ * auditoria dejaria de ser confiable, que es justo lo que se busca al registrarla.
+ */
+@Component({
+  selector: 'app-print-form',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule, AlertComponent],
+  templateUrl: './print-form.component.html'
+})
+export class PrintFormComponent {
+  private readonly formBuilder = inject(FormBuilder);
+
+  /** Zonas disponibles para el selector. */
+  readonly zones = input<ZoneDto[]>([]);
+
+  /** Usuario autenticado, mostrado en solo lectura. */
+  readonly userName = input('');
+
+  /** Indica si la ETQ consultada ya fue impresa antes. */
+  readonly requiresReprintReason = input(false);
+
+  /** Indica si el rol del usuario permite reimprimir. */
+  readonly canReprint = input(false);
+
+  /** Indica si hay una etiqueta resuelta lista para imprimir. */
+  readonly hasLabel = input(false);
+
+  /** Indica si hay una operacion en curso. */
+  readonly busy = input(false);
+
+  /** Solicita resolver la ETQ/LPN indicada. */
+  readonly resolveLabel = output<ResolveLabelRequest>();
+
+  /** Solicita procesar la impresion. */
+  readonly submitPrint = output<PrintRequestCreateDto>();
+
+  /** Formulario de la solicitud. */
+  protected readonly form = this.formBuilder.nonNullable.group({
+    lpn: ['', [Validators.required, Validators.maxLength(50)]],
+    zoneCode: [''],
+    reprintReason: ['', [Validators.maxLength(300)]]
+  });
+
+  constructor() {
+    // El motivo solo es obligatorio cuando la solicitud es realmente una reimpresion.
+    // Exigirlo siempre convertiria un control de excepcion en friccion diaria.
+    effect(() => {
+      const control = this.form.controls.reprintReason;
+      const required = this.requiresReprintReason() && this.canReprint();
+
+      control.setValidators(
+        required
+          ? [Validators.required, Validators.maxLength(300)]
+          : [Validators.maxLength(300)]
+      );
+      control.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
+  /** Emite la consulta de la etiqueta. */
+  protected resolve(): void {
+    const lpnControl = this.form.controls.lpn;
+    if (lpnControl.invalid) {
+      lpnControl.markAsTouched();
+      return;
+    }
+
+    const { lpn, zoneCode } = this.form.getRawValue();
+    this.resolveLabel.emit({ lpn: lpn.trim(), zoneCode: zoneCode || null });
+  }
+
+  /** Emite la solicitud de impresion. */
+  protected print(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const { lpn, zoneCode, reprintReason } = this.form.getRawValue();
+
+    this.submitPrint.emit({
+      lpn: lpn.trim(),
+      zoneCode: zoneCode || null,
+      reprintReason: this.requiresReprintReason() ? reprintReason.trim() || null : null
+    });
+  }
+}

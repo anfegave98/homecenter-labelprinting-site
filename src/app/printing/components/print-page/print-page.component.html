@@ -1,0 +1,50 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-xl font-semibold text-slate-900">Impresión de etiqueta</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Consulta una ETQ/LPN pre-generada, verifica el documento y la disponibilidad por zona, y
+      registra la impresión.
+    </p>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-[minmax(0,22rem)_1fr]">
+    <section class="rounded-xl border border-slate-200 bg-white p-4">
+      <app-print-form
+        [zones]="printing.zones()"
+        [userName]="auth.user()?.userName ?? ''"
+        [requiresReprintReason]="printing.requiresReprintReason()"
+        [canReprint]="auth.canReprint()"
+        [hasLabel]="printing.label() !== null"
+        [busy]="busy()"
+        (resolveLabel)="resolve($event)"
+        (submitPrint)="print($event)"
+      />
+    </section>
+
+    <div class="space-y-4">
+      @if (printing.labelLoading()) {
+        <div class="rounded-xl border border-slate-200 bg-white px-4 py-6">
+          <app-spinner label="Consultando la etiqueta..." />
+        </div>
+      }
+
+      @if (printing.labelError(); as error) {
+        <app-alert tone="error" [title]="'No fue posible resolver la etiqueta · ' + error.code">
+          {{ error.message }}
+        </app-alert>
+      }
+
+      @if (printing.label(); as label) {
+        <app-label-preview [label]="label" />
+      }
+
+      <app-print-result [result]="printing.result()" [rejection]="printing.rejection()" />
+
+      @if (printing.printing()) {
+        <div class="rounded-xl border border-slate-200 bg-white px-4 py-6">
+          <app-spinner label="Procesando la solicitud..." />
+        </div>
+      }
+    </div>
+  </div>
+</div>

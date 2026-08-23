@@ -1,0 +1,52 @@
+<section class="space-y-4">
+  <header>
+    <h1 class="text-xl font-semibold text-slate-900">Historial de impresiones</h1>
+    <p class="text-sm text-slate-600">
+      Trazabilidad de todas las solicitudes procesadas, aprobadas y rechazadas.
+    </p>
+  </header>
+
+  <app-history-filters
+    [zones]="printing.zones()"
+    [canFilterByUser]="auth.canReprint()"
+    [disabled]="history.loading()"
+    (search)="search($event)"
+    (clear)="clear()"
+  />
+
+  @if (scopeLabel(); as scope) {
+    <p class="text-xs text-slate-500">{{ scope }}</p>
+  }
+
+  @if (history.error(); as error) {
+    <app-alert tone="error" title="No fue posible consultar el historial">
+      {{ error.message }}
+    </app-alert>
+  }
+
+  <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+    @if (history.loading()) {
+      <div class="px-4 py-10 text-center">
+        <app-spinner label="Consultando historial..." />
+      </div>
+    } @else if (history.isEmpty()) {
+      <div class="p-4">
+        <app-empty-state
+          title="Sin solicitudes registradas"
+          description="No hay impresiones que cumplan los filtros aplicados."
+        />
+      </div>
+    } @else {
+      <app-history-table [items]="history.items()" />
+
+      <app-pagination
+        [page]="history.page()"
+        [pageSize]="history.pageSize()"
+        [total]="history.total()"
+        [totalPages]="history.totalPages()"
+        [disabled]="history.loading()"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  </div>
+</section>

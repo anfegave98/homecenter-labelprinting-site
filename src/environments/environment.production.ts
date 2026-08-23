@@ -5,7 +5,7 @@
  */
 export const environment = {
   production: true,
-  apiUrl: 'https://homecenter-label-printing-api.onrender.com/api',
+  apiUrl: 'https://homecenter-labelprinting-api.onrender.com/api',
 
   /**
    * Cifrado del payload de credenciales. Debe coincidir con Encryption:Enabled del

@@ -24,14 +24,14 @@ export class AlertComponent {
   readonly title = input<string | null>(null);
 
   private static readonly TONES: Record<AlertTone, string> = {
-    success: 'border-emerald-300 bg-emerald-50 text-emerald-900',
-    error: 'border-rose-300 bg-rose-50 text-rose-900',
-    warning: 'border-amber-300 bg-amber-50 text-amber-900',
-    info: 'border-sky-300 bg-sky-50 text-sky-900'
+    success: 'border-l-hc-success bg-hc-success-soft text-hc-success-strong',
+    error: 'border-l-hc-danger bg-hc-danger-soft text-hc-danger-strong',
+    warning: 'border-l-hc-warn bg-hc-warn-soft text-hc-warn-strong',
+    info: 'border-l-hc-blue bg-hc-blue-soft text-hc-blue'
   };
 
   /** Clases resultantes segun el tono. */
   protected readonly classes = computed(
-    () => 'rounded-lg border px-4 py-3 space-y-1 ' + AlertComponent.TONES[this.tone()]
+    () => 'rounded-[10px] border-l-4 px-4 py-3.5 space-y-1 ' + AlertComponent.TONES[this.tone()]
   );
 }

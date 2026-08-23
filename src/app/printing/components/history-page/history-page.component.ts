@@ -4,7 +4,7 @@ import { AuthFacade } from '../../../auth/facades/auth.facade';
 import { AlertComponent } from '../../../shared/ui/alert.component';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state.component';
 import { PaginationComponent } from '../../../shared/ui/pagination.component';
-import { SpinnerComponent } from '../../../shared/ui/spinner.component';
+import { BrandLoaderComponent } from '../../../shared/ui/brand-loader.component';
 import { HistoryFacade } from '../../facades/history.facade';
 import { PrintingFacade } from '../../facades/printing.facade';
 import { PrintHistoryFilterDto } from '../../models/printing.models';
@@ -26,7 +26,7 @@ import { HistoryTableComponent } from '../history-table/history-table.component'
     PaginationComponent,
     AlertComponent,
     EmptyStateComponent,
-    SpinnerComponent
+    BrandLoaderComponent
   ],
   templateUrl: './history-page.component.html'
 })

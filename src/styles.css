@@ -1,5 +1,67 @@
 @import "tailwindcss";
 
+/*
+  Tipografia self-hosted: sin dependencia de Google Fonts ni de CSP externa, igual
+  que en la plantilla base de Homecenter. Solo tres pesos — 400 cuerpo, 700 enfasis
+  y 900 titulos — porque son los unicos que la interfaz usa.
+*/
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/lato-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/lato-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/assets/fonts/lato-900.woff2') format('woff2');
+}
+
+/*
+  Tokens de marca tomados de los activos oficiales de Homecenter, no elegidos a ojo:
+  el azul y el amarillo salen del logotipo, y los semanticos de _variables.scss de la
+  plantilla base. El amarillo es el del logotipo (#FBD600); el spinner de la plantilla
+  traia #FCE454 y se unifico para no arrastrar dos amarillos distintos.
+*/
+@theme {
+  --font-sans: 'Lato', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  --color-hc-blue: #0072CE;
+  --color-hc-blue-hover: #005192;
+  --color-hc-blue-title: #165EDB;
+  --color-hc-blue-soft: #E6F1FA;
+  --color-hc-yellow: #FBD600;
+
+  --color-hc-success: #008A00;
+  --color-hc-success-strong: #006200;
+  --color-hc-success-soft: #E6F3E6;
+  --color-hc-danger: #DD0021;
+  --color-hc-danger-strong: #9D0017;
+  --color-hc-danger-soft: #FCE6E9;
+  --color-hc-warn: #FB923C;
+  --color-hc-warn-strong: #5B4E00;
+  --color-hc-warn-soft: #FFFBE6;
+
+  --color-hc-bg: #EFF3F8;
+  --color-hc-surface: #F7FAFD;
+  --color-hc-border: #DCE4ED;
+  --color-hc-hairline: #E9EEF5;
+  --color-hc-ink: #333333;
+  --color-hc-muted: #6E7A8A;
+  --color-hc-faint: #8A8A8A;
+  --color-hc-disabled: #C4CCD6;
+}
+
 html,
 body {
   height: 100%;
@@ -7,7 +69,80 @@ body {
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background-color: #f8fafc;
-  color: #0f172a;
+  font-family: var(--font-sans);
+  background-color: var(--color-hc-bg);
+  color: var(--color-hc-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+  Foco visible y consistente en toda la aplicacion. Se define una vez aqui en vez de
+  repetirlo control por control: sin foco visible queda fuera quien navega con teclado,
+  y en piso de tienda eso ocurre mas de lo que parece.
+*/
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: none;
+  border-color: var(--color-hc-blue);
+  box-shadow: 0 0 0 3px rgb(0 114 206 / 0.16);
+}
+
+/* Elevacion de tarjeta: sombra suave en lugar de borde duro. */
+.hc-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 2px rgb(16 32 56 / 0.06),
+    0 10px 28px -18px rgb(16 32 56 / 0.22);
+}
+
+/* Campo de formulario. Alto 46px: se opera de pie y a veces con guantes. */
+.hc-input {
+  width: 100%;
+  height: 46px;
+  border: 1.5px solid var(--color-hc-border);
+  border-radius: 9px;
+  padding: 0 0.875rem;
+  font-size: 0.9375rem;
+  color: var(--color-hc-ink);
+  background: #ffffff;
+}
+.hc-input[readonly] {
+  background: #F4F7FB;
+  color: var(--color-hc-muted);
+}
+.hc-input::placeholder {
+  color: var(--color-hc-disabled);
+}
+
+.hc-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-hc-muted);
+  margin-bottom: 0.4375rem;
+}
+
+/*
+  Franja azul con remate amarillo: el gesto que ancla cada pantalla a la identidad de
+  Homecenter sin repetir el logotipo en grande.
+*/
+.hc-brandbar {
+  height: 3px;
+  display: flex;
+}
+.hc-brandbar::before {
+  content: '';
+  flex-grow: 1;
+  background: var(--color-hc-blue);
+}
+.hc-brandbar::after {
+  content: '';
+  width: 168px;
+  background: var(--color-hc-yellow);
 }

@@ -5,9 +5,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'app-spinner',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <span class="inline-flex items-center gap-2 text-sm text-slate-600" role="status">
+    <span class="inline-flex items-center gap-2.5 text-sm font-bold text-hc-muted" role="status">
       <span
-        class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700"
+        class="h-4 w-4 animate-spin rounded-full border-2 border-hc-border border-t-hc-blue"
         aria-hidden="true"
       ></span>
       <span>{{ label() }}</span>

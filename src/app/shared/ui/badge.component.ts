@@ -18,17 +18,17 @@ export class BadgeComponent {
   readonly tone = input<BadgeTone>('neutral');
 
   private static readonly TONES: Record<BadgeTone, string> = {
-    success: 'bg-emerald-100 text-emerald-800 ring-emerald-600/20',
-    danger: 'bg-rose-100 text-rose-800 ring-rose-600/20',
-    warning: 'bg-amber-100 text-amber-800 ring-amber-600/20',
-    info: 'bg-sky-100 text-sky-800 ring-sky-600/20',
-    neutral: 'bg-slate-100 text-slate-700 ring-slate-500/20'
+    success: 'bg-hc-success-soft text-hc-success-strong',
+    danger: 'bg-hc-danger-soft text-hc-danger-strong',
+    warning: 'bg-hc-warn-soft text-hc-warn-strong',
+    info: 'bg-hc-blue-soft text-hc-blue',
+    neutral: 'bg-[#F3F3F3] text-hc-muted'
   };
 
   /** Clases resultantes segun el tono. */
   protected readonly classes = computed(
     () =>
-      'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ' +
+      'inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ' +
       BadgeComponent.TONES[this.tone()]
   );
 }

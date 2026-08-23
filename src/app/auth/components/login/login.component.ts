@@ -4,14 +4,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { ApiError } from '../../../shared/models/api-response.model';
 import { AlertComponent } from '../../../shared/ui/alert.component';
-import { SpinnerComponent } from '../../../shared/ui/spinner.component';
 import { AuthFacade } from '../../facades/auth.facade';
 
 /** Pantalla de ingreso al submodulo. */
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, AlertComponent, SpinnerComponent],
+  imports: [ReactiveFormsModule, AlertComponent],
   templateUrl: './login.component.html'
 })
 export class LoginComponent {

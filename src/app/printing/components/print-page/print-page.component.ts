@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@a
 
 import { AuthFacade } from '../../../auth/facades/auth.facade';
 import { AlertComponent } from '../../../shared/ui/alert.component';
-import { SpinnerComponent } from '../../../shared/ui/spinner.component';
+import { BrandLoaderComponent } from '../../../shared/ui/brand-loader.component';
 import { PrintingFacade } from '../../facades/printing.facade';
 import { PrintRequestCreateDto } from '../../models/printing.models';
 import { LabelPreviewComponent } from '../label-preview/label-preview.component';
@@ -23,7 +23,7 @@ import { PrintResultComponent } from '../print-result/print-result.component';
     LabelPreviewComponent,
     PrintResultComponent,
     AlertComponent,
-    SpinnerComponent
+    BrandLoaderComponent
   ],
   templateUrl: './print-page.component.html'
 })

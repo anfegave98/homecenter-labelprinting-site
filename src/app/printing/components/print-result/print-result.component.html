@@ -12,16 +12,16 @@
 
     @if (shortages().length > 0) {
       <div class="rounded-lg border border-rose-200 bg-white">
-        <p class="border-b border-rose-100 px-4 py-2 text-sm font-semibold text-slate-900">
+        <p class="border-b border-rose-100 px-4 py-2 text-sm font-semibold text-hc-ink">
           Productos que bloquean la impresión
         </p>
-        <ul class="divide-y divide-slate-100">
+        <ul class="divide-y divide-hc-hairline">
           @for (item of shortages(); track item.productCode) {
             <li class="px-4 py-2 text-sm">
-              <p class="font-medium text-slate-900">
+              <p class="font-medium text-hc-ink">
                 {{ item.productCode }} · {{ item.productDescription }}
               </p>
-              <p class="text-xs text-slate-600">
+              <p class="text-xs text-hc-muted">
                 Solicitado {{ item.requestedQty }} · Disponible {{ item.availableQty }} ·
                 Abastecido {{ item.isStocked ? 'Sí' : 'No' }} — {{ item.reason }}
               </p>
@@ -32,59 +32,59 @@
     }
 
     @if (result(); as printResult) {
-      <div class="rounded-xl border border-slate-200 bg-white">
-        <header class="flex flex-wrap items-center gap-2 border-b border-slate-200 px-4 py-3">
+      <div class="hc-card">
+        <header class="flex flex-wrap items-center gap-2 border-b border-hc-hairline px-4 py-3">
           <app-badge [tone]="approved() ? 'success' : 'danger'">
             {{ approved() ? 'Aprobada' : 'Rechazada' }}
           </app-badge>
           <app-badge [tone]="isReprint() ? 'warning' : 'info'">
             {{ isReprint() ? 'Reimpresión' : 'Impresión' }}
           </app-badge>
-          <span class="ml-auto font-mono text-xs text-slate-500">
+          <span class="ml-auto font-mono text-xs text-hc-faint">
             {{ printResult.correlationId }}
           </span>
         </header>
 
         <dl class="grid gap-x-6 gap-y-3 px-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">LPN</dt>
-            <dd class="text-sm font-medium text-slate-900">{{ printResult.lpnId }}</dd>
+            <dt class="text-xs uppercase tracking-wide text-hc-faint">LPN</dt>
+            <dd class="text-sm font-medium text-hc-ink">{{ printResult.lpnId }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Zona</dt>
-            <dd class="text-sm font-medium text-slate-900">{{ printResult.zoneCode ?? '—' }}</dd>
+            <dt class="text-xs uppercase tracking-wide text-hc-faint">Zona</dt>
+            <dd class="text-sm font-medium text-hc-ink">{{ printResult.zoneCode ?? '—' }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Usuario</dt>
-            <dd class="text-sm font-medium text-slate-900">{{ printResult.userName }}</dd>
+            <dt class="text-xs uppercase tracking-wide text-hc-faint">Usuario</dt>
+            <dd class="text-sm font-medium text-hc-ink">{{ printResult.userName }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Documento</dt>
-            <dd class="text-sm font-medium text-slate-900">
+            <dt class="text-xs uppercase tracking-wide text-hc-faint">Documento</dt>
+            <dd class="text-sm font-medium text-hc-ink">
               {{ printResult.documentNumber ?? '—' }}
             </dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Procesada</dt>
-            <dd class="text-sm font-medium text-slate-900">
+            <dt class="text-xs uppercase tracking-wide text-hc-faint">Procesada</dt>
+            <dd class="text-sm font-medium text-hc-ink">
               {{ printResult.processedAt | date: 'dd/MM/yyyy HH:mm:ss' }}
             </dd>
           </div>
           @if (printResult.reprintReason) {
             <div class="sm:col-span-2 lg:col-span-3">
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Motivo de reimpresión</dt>
-              <dd class="text-sm font-medium text-slate-900">{{ printResult.reprintReason }}</dd>
+              <dt class="text-xs uppercase tracking-wide text-hc-faint">Motivo de reimpresión</dt>
+              <dd class="text-sm font-medium text-hc-ink">{{ printResult.reprintReason }}</dd>
             </div>
           }
         </dl>
 
         @if (printResult.zpl; as zpl) {
-          <details class="border-t border-slate-200 px-4 py-3">
-            <summary class="cursor-pointer text-sm font-medium text-slate-700">
+          <details class="border-t border-hc-hairline px-4 py-3">
+            <summary class="cursor-pointer text-sm font-medium text-hc-muted">
               Ver ZPL enviado a la impresora
             </summary>
             <pre
-              class="mt-2 max-h-64 overflow-auto rounded-lg bg-slate-900 p-3 font-mono text-xs text-slate-100"
+              class="mt-2 max-h-64 overflow-auto rounded-lg bg-hc-blue p-3 font-mono text-xs text-slate-100"
             >{{ zpl }}</pre>
           </details>
         }

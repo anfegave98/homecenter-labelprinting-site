@@ -1,55 +1,110 @@
-<div class="mx-auto w-full max-w-md">
-  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <h1 class="text-xl font-semibold text-slate-900">Ingresar</h1>
-    <p class="mt-1 text-sm text-slate-500">
-      Autentícate para consultar ETQ/LPN y registrar impresiones.
-    </p>
+<div class="hc-card mx-auto grid w-full max-w-5xl overflow-hidden lg:grid-cols-[minmax(0,1fr)_480px]">
+  <!--
+    Panel de marca. Solo desde lg: en movil ocuparia toda la pantalla y empujaria el
+    formulario fuera del pliegue, que es justo lo que el operario viene a usar.
+  -->
+  <div class="relative hidden flex-col justify-between overflow-hidden bg-hc-blue p-12 lg:flex">
+    <div
+      class="absolute -bottom-36 -right-32 h-[420px] w-[420px] rounded-full bg-hc-yellow/15"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="absolute -top-16 right-12 h-52 w-52 rounded-full bg-white/[0.07]"
+      aria-hidden="true"
+    ></div>
+
+    <div class="relative flex items-center gap-3.5">
+      <span class="inline-flex h-[52px] w-[52px] items-center justify-center rounded-[13px] bg-white">
+        <img src="/assets/brand/homecenter-isotipo.svg" alt="Homecenter" class="w-[34px]" />
+      </span>
+      <span class="text-[15px] font-black tracking-tight text-white">Impresión de Etiquetas</span>
+    </div>
+
+    <div class="relative flex max-w-md flex-col gap-5">
+      <span class="h-[5px] w-14 rounded-full bg-hc-yellow" aria-hidden="true"></span>
+      <h1 class="m-0 text-[40px] font-black leading-tight tracking-tight text-white text-pretty">
+        Impresión de etiquetas del piso de tienda
+      </h1>
+      <p class="m-0 text-base leading-relaxed text-white/80 text-pretty">
+        Valida disponibilidad por zona, controla reimpresiones y deja trazabilidad de cada
+        solicitud.
+      </p>
+    </div>
+
+    <div class="relative flex gap-8">
+      <div class="flex flex-col gap-1">
+        <span class="text-2xl font-black leading-none text-hc-yellow">5</span>
+        <span class="text-xs font-bold uppercase tracking-wide text-white/70">Reglas validadas</span>
+      </div>
+      <span class="w-px bg-white/20" aria-hidden="true"></span>
+      <div class="flex flex-col gap-1">
+        <span class="text-2xl font-black leading-none text-hc-yellow">100%</span>
+        <span class="text-xs font-bold uppercase tracking-wide text-white/70">
+          Solicitudes auditadas
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel de acceso -->
+  <div class="flex flex-col justify-center gap-6 bg-white p-6 sm:p-12">
+    <div class="flex items-center gap-3 lg:hidden">
+      <img
+        src="/assets/brand/homecenter-logo.svg"
+        alt="Homecenter Sodimac Corona"
+        class="h-8 w-auto"
+      />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <h2 class="m-0 text-[27px] font-black tracking-tight text-hc-ink">Ingresar</h2>
+      <p class="m-0 text-[15px] leading-relaxed text-hc-muted">
+        Autentícate para consultar ETQ/LPN y registrar impresiones.
+      </p>
+    </div>
 
     @if (sessionExpired()) {
-      <div class="mt-4">
-        <app-alert tone="warning">Tu sesión expiró. Ingresa nuevamente para continuar.</app-alert>
-      </div>
+      <app-alert tone="warning">Tu sesión expiró. Ingresa nuevamente para continuar.</app-alert>
     }
 
     @if (error(); as loginError) {
-      <div class="mt-4">
-        <app-alert tone="error" title="No fue posible ingresar">{{ loginError.message }}</app-alert>
-      </div>
+      <app-alert tone="error" title="No fue posible ingresar">{{ loginError.message }}</app-alert>
     }
 
-    <form class="mt-5 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+    <form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()">
       <div>
-        <label class="block text-sm font-medium text-slate-700" for="userName">Usuario</label>
+        <label class="hc-label" for="userName">Usuario</label>
         <input
           id="userName"
           type="text"
           autocomplete="username"
           formControlName="userName"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+          class="hc-input"
         />
         @if (form.controls.userName.touched && form.controls.userName.invalid) {
-          <p class="mt-1 text-xs text-rose-600">El usuario es obligatorio.</p>
+          <p class="mt-1.5 text-xs font-bold text-hc-danger">El usuario es obligatorio.</p>
         }
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-slate-700" for="password">Contraseña</label>
+        <label class="hc-label" for="password">Contraseña</label>
         <input
           id="password"
           type="password"
           autocomplete="current-password"
           formControlName="password"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+          class="hc-input"
         />
         @if (form.controls.password.touched && form.controls.password.invalid) {
-          <p class="mt-1 text-xs text-rose-600">La contraseña es obligatoria.</p>
+          <p class="mt-1.5 text-xs font-bold text-hc-danger">La contraseña es obligatoria.</p>
         }
       </div>
 
       <button
         type="submit"
         [disabled]="auth.loading()"
-        class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        class="h-[50px] w-full rounded-[10px] bg-hc-blue text-[15px] font-bold text-white transition
+               hover:bg-hc-blue-hover disabled:cursor-not-allowed disabled:bg-hc-disabled"
       >
         @if (auth.loading()) {
           Ingresando...
@@ -57,44 +112,41 @@
           Ingresar
         }
       </button>
-
-      @if (auth.loading()) {
-        <div class="flex justify-center">
-          <app-spinner label="Validando credenciales..." />
-        </div>
-      }
     </form>
-  </div>
 
-  <div class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-      Usuarios de prueba
-    </p>
-    <div class="mt-2 grid gap-2">
-      <button
-        type="button"
-        class="rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-slate-400"
-        (click)="useDemoUser('operario.tienda', 'Operario123*')"
-      >
-        <span class="font-medium">operario.tienda</span>
-        <span class="block text-xs text-slate-500">Imprime; no puede reimprimir.</span>
-      </button>
-      <button
-        type="button"
-        class="rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-slate-400"
-        (click)="useDemoUser('supervisor.tienda', 'Supervisor123*')"
-      >
-        <span class="font-medium">supervisor.tienda</span>
-        <span class="block text-xs text-slate-500">Autoriza reimpresiones con motivo.</span>
-      </button>
-      <button
-        type="button"
-        class="rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-slate-400"
-        (click)="useDemoUser('admin.tienda', 'Admin123*')"
-      >
-        <span class="font-medium">admin.tienda</span>
-        <span class="block text-xs text-slate-500">Además consulta indicadores.</span>
-      </button>
+    <div class="flex flex-col gap-3 rounded-[11px] border-[1.5px] border-[#E3EAF2] bg-hc-surface p-4">
+      <p class="m-0 text-[11px] font-bold uppercase tracking-[0.09em] text-hc-faint">
+        Usuarios de prueba
+      </p>
+      <div class="grid gap-2">
+        <button
+          type="button"
+          class="flex flex-wrap items-center justify-between gap-2 rounded-[9px] border-[1.5px]
+                 border-transparent px-3 py-2.5 text-left transition hover:border-hc-border hover:bg-white"
+          (click)="useDemoUser('operario.tienda', 'Operario123*')"
+        >
+          <span class="text-[13.5px] font-bold text-hc-ink">operario.tienda</span>
+          <span class="text-[12.5px] text-hc-faint">Imprime; no reimprime</span>
+        </button>
+        <button
+          type="button"
+          class="flex flex-wrap items-center justify-between gap-2 rounded-[9px] border-[1.5px]
+                 border-transparent px-3 py-2.5 text-left transition hover:border-hc-border hover:bg-white"
+          (click)="useDemoUser('supervisor.tienda', 'Supervisor123*')"
+        >
+          <span class="text-[13.5px] font-bold text-hc-ink">supervisor.tienda</span>
+          <span class="text-[12.5px] text-hc-faint">Autoriza reimpresiones</span>
+        </button>
+        <button
+          type="button"
+          class="flex flex-wrap items-center justify-between gap-2 rounded-[9px] border-[1.5px]
+                 border-transparent px-3 py-2.5 text-left transition hover:border-hc-border hover:bg-white"
+          (click)="useDemoUser('admin.tienda', 'Admin123*')"
+        >
+          <span class="text-[13.5px] font-bold text-hc-ink">admin.tienda</span>
+          <span class="text-[12.5px] text-hc-faint">Consulta indicadores</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

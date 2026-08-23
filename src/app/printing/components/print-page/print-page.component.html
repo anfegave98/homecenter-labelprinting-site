@@ -1,14 +1,14 @@
-<div class="space-y-6">
-  <div>
-    <h1 class="text-xl font-semibold text-slate-900">Impresión de etiqueta</h1>
-    <p class="mt-1 text-sm text-slate-500">
+<div class="flex flex-col gap-5">
+  <div class="flex flex-col gap-1">
+    <h1 class="m-0 text-2xl font-black tracking-tight text-hc-blue-title">Imprimir etiqueta</h1>
+    <p class="m-0 text-sm text-hc-muted">
       Consulta una ETQ/LPN pre-generada, verifica el documento y la disponibilidad por zona, y
       registra la impresión.
     </p>
   </div>
 
-  <div class="grid gap-6 lg:grid-cols-[minmax(0,22rem)_1fr]">
-    <section class="rounded-xl border border-slate-200 bg-white p-4">
+  <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,24.5rem)_minmax(0,1fr)]">
+    <section class="hc-card p-5">
       <app-print-form
         [zones]="printing.zones()"
         [userName]="auth.user()?.userName ?? ''"
@@ -21,10 +21,14 @@
       />
     </section>
 
-    <div class="space-y-4">
+    <div class="flex flex-col gap-4">
       @if (printing.labelLoading()) {
-        <div class="rounded-xl border border-slate-200 bg-white px-4 py-6">
-          <app-spinner label="Consultando la etiqueta..." />
+        <div class="hc-card px-4 py-10">
+          <app-brand-loader
+            label="Consultando la etiqueta"
+            detail="Resolviendo el documento origen y sus productos."
+            [markSize]="58"
+          />
         </div>
       }
 
@@ -41,8 +45,12 @@
       <app-print-result [result]="printing.result()" [rejection]="printing.rejection()" />
 
       @if (printing.printing()) {
-        <div class="rounded-xl border border-slate-200 bg-white px-4 py-6">
-          <app-spinner label="Procesando la solicitud..." />
+        <div class="hc-card px-4 py-10">
+          <app-brand-loader
+            label="Estamos obteniendo los datos de tu operación"
+            detail="Validando disponibilidad por zona y estado del documento."
+            [markSize]="58"
+          />
         </div>
       }
     </div>

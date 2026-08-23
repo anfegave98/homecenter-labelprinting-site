@@ -1,58 +1,77 @@
-<div class="min-h-screen flex flex-col bg-slate-50">
-  <header class="bg-slate-900 text-white shadow-sm">
-    <div class="mx-auto w-full max-w-6xl px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <span class="inline-flex h-8 w-8 items-center justify-center rounded bg-emerald-500 font-bold text-slate-900">
-          ETQ
-        </span>
-        <div class="leading-tight">
-          <p class="font-semibold">Impresión de Etiquetas</p>
-          <p class="text-xs text-slate-300">Homecenter · GTL Tienda</p>
+<div class="flex min-h-screen flex-col bg-hc-bg">
+  <header class="bg-white shadow-[0_1px_2px_rgb(16_32_56/0.05)]">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 border-b border-[#E3EAF2] px-4 py-3 sm:px-7"
+    >
+      <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+        <div class="flex items-center gap-3.5">
+          <img
+            src="/assets/brand/homecenter-logo.svg"
+            alt="Homecenter Sodimac Corona"
+            class="h-7 w-auto sm:h-[34px]"
+          />
+          <span class="hidden h-[30px] w-px bg-[#E3EAF2] sm:block"></span>
+          <span class="hidden text-[15px] font-black leading-tight tracking-tight text-hc-ink sm:block">
+            Impresión de Etiquetas
+          </span>
         </div>
-      </div>
 
-      @if (auth.isAuthenticated()) {
-        <div class="flex flex-wrap items-center gap-4">
+        @if (auth.isAuthenticated()) {
           <nav class="flex items-center gap-1 text-sm">
             <a
               routerLink="/impresion"
-              routerLinkActive="bg-slate-700"
-              class="rounded px-3 py-1.5 transition hover:bg-slate-800"
+              routerLinkActive="bg-hc-blue-soft font-bold text-hc-blue"
+              class="inline-flex h-[38px] items-center rounded-[9px] px-4 text-hc-muted transition hover:bg-hc-surface"
             >
               Impresión
             </a>
             <a
               routerLink="/historial"
-              routerLinkActive="bg-slate-700"
-              class="rounded px-3 py-1.5 transition hover:bg-slate-800"
+              routerLinkActive="bg-hc-blue-soft font-bold text-hc-blue"
+              class="inline-flex h-[38px] items-center rounded-[9px] px-4 text-hc-muted transition hover:bg-hc-surface"
             >
               Historial
             </a>
           </nav>
+        }
+      </div>
 
-          <div class="text-right leading-tight">
-            <p class="text-sm font-medium">{{ auth.user()?.fullName }}</p>
-            <p class="text-xs text-slate-300">{{ auth.roles().join(' · ') }}</p>
+      @if (auth.isAuthenticated()) {
+        <div class="flex items-center gap-3.5">
+          <div class="hidden text-right leading-tight sm:block">
+            <p class="text-sm font-bold text-hc-ink">{{ auth.user()?.fullName }}</p>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-hc-faint">
+              {{ auth.roles().join(' · ') }}
+            </p>
           </div>
+
+          <span
+            class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-full bg-hc-yellow text-sm font-black text-hc-ink"
+            aria-hidden="true"
+          >
+            {{ initials() }}
+          </span>
 
           <button
             type="button"
             (click)="auth.logout()"
-            class="rounded-lg border border-slate-600 px-3 py-1.5 text-sm transition hover:border-slate-400"
+            class="h-[38px] rounded-[9px] border-[1.5px] border-hc-border px-4 text-[13px] font-bold text-hc-muted transition hover:border-hc-muted"
           >
             Salir
           </button>
         </div>
       }
     </div>
+
+    <div class="hc-brandbar"></div>
   </header>
 
-  <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+  <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-7">
     <router-outlet />
   </main>
 
-  <footer class="border-t border-slate-200 bg-white">
-    <div class="mx-auto w-full max-w-6xl px-4 py-3 text-xs text-slate-500">
+  <footer class="border-t border-[#E3EAF2] bg-white">
+    <div class="mx-auto w-full max-w-7xl px-4 py-4 text-xs text-hc-faint sm:px-7">
       Submódulo de impresión de ETQ · Prueba técnica
     </div>
   </footer>

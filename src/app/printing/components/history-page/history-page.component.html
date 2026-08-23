@@ -1,7 +1,7 @@
-<section class="space-y-4">
-  <header>
-    <h1 class="text-xl font-semibold text-slate-900">Historial de impresiones</h1>
-    <p class="text-sm text-slate-600">
+<section class="flex flex-col gap-5">
+  <header class="flex flex-col gap-1">
+    <h1 class="m-0 text-2xl font-black tracking-tight text-hc-blue-title">Historial de impresiones</h1>
+    <p class="m-0 text-sm text-hc-muted">
       Trazabilidad de todas las solicitudes procesadas, aprobadas y rechazadas.
     </p>
   </header>
@@ -15,7 +15,7 @@
   />
 
   @if (scopeLabel(); as scope) {
-    <p class="text-xs text-slate-500">{{ scope }}</p>
+    <p class="text-xs text-hc-faint">{{ scope }}</p>
   }
 
   @if (history.error(); as error) {
@@ -24,10 +24,10 @@
     </app-alert>
   }
 
-  <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+  <div class="hc-card overflow-hidden">
     @if (history.loading()) {
-      <div class="px-4 py-10 text-center">
-        <app-spinner label="Consultando historial..." />
+      <div class="px-4 py-12">
+        <app-brand-loader label="Consultando historial" [markSize]="58" />
       </div>
     } @else if (history.isEmpty()) {
       <div class="p-4">

@@ -6,32 +6,32 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav
-      class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3"
+      class="flex flex-wrap items-center justify-between gap-3 border-t border-hc-hairline px-4 py-3"
       aria-label="Paginación del historial"
     >
-      <p class="text-sm text-slate-600">
+      <p class="text-sm text-hc-muted">
         {{ rangeLabel() }}
       </p>
 
       <div class="flex items-center gap-2">
         <button
           type="button"
-          class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition
-                 hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-40"
+          class="h-10 rounded-[9px] border-[1.5px] border-hc-border px-4 text-sm font-bold text-hc-muted transition
+                 hover:border-hc-muted disabled:cursor-not-allowed disabled:opacity-40"
           [disabled]="disabled() || page() <= 1"
           (click)="pageChange.emit(page() - 1)"
         >
           Anterior
         </button>
 
-        <span class="text-sm text-slate-600" aria-live="polite">
+        <span class="text-sm text-hc-muted" aria-live="polite">
           Página {{ page() }} de {{ totalPages() || 1 }}
         </span>
 
         <button
           type="button"
-          class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition
-                 hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-40"
+          class="h-10 rounded-[9px] border-[1.5px] border-hc-border px-4 text-sm font-bold text-hc-muted transition
+                 hover:border-hc-muted disabled:cursor-not-allowed disabled:opacity-40"
           [disabled]="disabled() || page() >= totalPages()"
           (click)="pageChange.emit(page() + 1)"
         >

@@ -1,0 +1,20 @@
+{
+  // Configuracion de despliegue en Cloudflare Workers con assets estaticos.
+  //
+  // Cloudflare movio el hospedaje de sitios estaticos de Pages a Workers: el panel
+  // ejecuta `npx wrangler deploy` y lee este archivo. No hay codigo de Worker, solo
+  // los archivos compilados de Angular, por eso no se declara `main` ni el binding
+  // `ASSETS` — ese binding solo es valido cuando existe un script.
+  "name": "homecenter-labelprinting-site",
+  "compatibility_date": "2026-08-23",
+
+  "assets": {
+    // Salida del build de Angular. Debe coincidir con `outputPath` de angular.json.
+    "directory": "./dist/homecenter-labelprinting-site/browser",
+
+    // Angular resuelve el enrutamiento en el navegador: una recarga en /historial
+    // pide una ruta que no existe como archivo. Sin esto, Cloudflare devolveria 404
+    // en lugar de entregar index.html y dejar que el router haga su trabajo.
+    "not_found_handling": "single-page-application"
+  }
+}

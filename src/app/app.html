@@ -1,0 +1,25 @@
+<div class="min-h-screen flex flex-col bg-slate-50">
+  <header class="bg-slate-900 text-white shadow-sm">
+    <div class="mx-auto w-full max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded bg-emerald-500 font-bold text-slate-900">
+          ETQ
+        </span>
+        <div class="leading-tight">
+          <p class="font-semibold">Impresión de Etiquetas</p>
+          <p class="text-xs text-slate-300">Homecenter · GTL Tienda</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+    <router-outlet />
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="mx-auto w-full max-w-6xl px-4 py-3 text-xs text-slate-500">
+      Submódulo de impresión de ETQ · Prueba técnica
+    </div>
+  </footer>
+</div>

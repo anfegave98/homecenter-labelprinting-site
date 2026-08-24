@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApiError, PagedMeta } from '../../shared/models/api-response.model';
 import { SessionScopedState } from '../../shared/state/session-scoped-state';
-import { saveBlobAs } from '../../shared/utils/file-download.util';
+import { deliverLabel } from '../../shared/utils/label-delivery.util';
 import { PrintHistoryFilterDto, PrintHistoryItemDto } from '../models/printing.models';
 import { PrintingService } from '../services/printing.service';
 
@@ -145,9 +145,10 @@ export class HistoryFacade implements SessionScopedState {
 
     this.printingService.downloadLabel(id).subscribe({
       next: (file) => {
-        saveBlobAs(file.blob, file.fileName);
-        this.markAsDownloaded(id);
-        this.downloadingSignal.set(null);
+        void deliverLabel(file.blob, file.fileName).finally(() => {
+          this.markAsDownloaded(id);
+          this.downloadingSignal.set(null);
+        });
       },
       error: (error: ApiError) => {
         this.downloadErrorSignal.set(error);

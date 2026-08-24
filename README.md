@@ -56,6 +56,19 @@ decide contra qué stock se valida —el mismo LPN aprueba en `ZONA-PICKING-A` y
 en `ZONA-PICKING-B`— y un valor por defecto la convertiría en una suposición del sistema,
 con el operario recibiendo un rechazo correcto pero incomprensible.
 
+Al descargar la etiqueta se entregan **dos archivos**: el `.zpl` que va a la impresora y
+un `.png` para verla. El ZPL es el artefacto real, pero es ilegible para una persona y
+durante la evaluación no hay impresora conectada; el PNG permite comprobar de un vistazo
+que la etiqueta se genera con los datos correctos.
+
+La imagen se dibuja en canvas a partir del bloque de metadatos que el propio `.zpl` trae
+embebido como comentario `^FX`. Así ambos archivos salen de la misma fuente y no pueden
+divergir. El `.zpl` se guarda primero y siempre: si el dibujo falla, el operario se queda
+con el archivo que realmente necesita en vez de perder la descarga completa.
+
+> El código de barras del `.png` es una representación y **no se puede leer con pistola**.
+> La lectura real la da el `.zpl`.
+
 **`/aprobaciones`** — bandeja de reimpresiones pendientes, ordenada de la más antigua a
 la más reciente. Cada solicitud muestra el motivo que escribió quien la pidió, que es lo
 único con lo que el autorizador decide. Solo `Supervisor` y `Admin` (`roleGuard`).

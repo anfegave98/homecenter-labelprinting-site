@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApiError } from '../../shared/models/api-response.model';
 import { SessionScopedState } from '../../shared/state/session-scoped-state';
-import { saveBlobAs } from '../../shared/utils/file-download.util';
+import { deliverLabel } from '../../shared/utils/label-delivery.util';
 import {
   LabelDetailDto,
   PrintRequestCreateDto,
@@ -164,9 +164,12 @@ export class PrintingFacade implements SessionScopedState {
 
     this.printingService.downloadLabel(requestId).subscribe({
       next: (file) => {
-        saveBlobAs(file.blob, file.fileName);
-        this.downloadingSignal.set(false);
-        this.reset();
+        // El dibujo del PNG es asincrono; la pantalla se limpia cuando ambos archivos
+        // ya salieron, no antes.
+        void deliverLabel(file.blob, file.fileName).finally(() => {
+          this.downloadingSignal.set(false);
+          this.reset();
+        });
       },
       error: (error: ApiError) => {
         this.downloadErrorSignal.set(error);

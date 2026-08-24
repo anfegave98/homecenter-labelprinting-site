@@ -96,9 +96,10 @@ function paint(ctx: CanvasRenderingContext2D, label: LabelMetadata): void {
 
   rule(ctx, 168, 4);
 
-  // Identificación
-  field(ctx, 'ETQ', label.etqId, 40, 198);
-  field(ctx, 'ZONA', label.zoneCode, 420, 198);
+  // Identificación. El ancho disponible se acota por columna: un código de zona largo
+  // se salía del borde derecho de la etiqueta.
+  field(ctx, 'ETQ', label.etqId, 40, 198, 360);
+  field(ctx, 'ZONA', label.zoneCode, 420, 198, WIDTH - 460);
 
   ctx.font = '400 24px Lato, Arial, sans-serif';
   ctx.fillText('DOCUMENTO', 40, 316);
@@ -150,13 +151,41 @@ function field(
   caption: string,
   value: string,
   x: number,
-  y: number
+  y: number,
+  maxWidth: number
 ): void {
   ctx.font = '400 24px Lato, Arial, sans-serif';
   ctx.fillText(caption, x, y);
 
-  ctx.font = '700 48px Lato, Arial, sans-serif';
-  ctx.fillText(value, x, y + 32);
+  fitText(ctx, value, x, y + 32, maxWidth, 48);
+}
+
+/**
+ * Escribe el texto reduciendo el tamaño hasta que quepa en el ancho dado.
+ *
+ * Los códigos de zona y de ETQ no tienen longitud acotada, y uno largo se salía del
+ * borde de la etiqueta. Encoger es preferible a recortar: un identificador cortado es
+ * peor que uno pequeño, porque parece otro identificador.
+ */
+function fitText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  startSize: number
+): void {
+  let size = startSize;
+
+  do {
+    ctx.font = `700 ${size}px Lato, Arial, sans-serif`;
+    if (ctx.measureText(text).width <= maxWidth) {
+      break;
+    }
+    size -= 2;
+  } while (size > 16);
+
+  ctx.fillText(text, x, y);
 }
 
 /**

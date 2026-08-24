@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApiError, PagedMeta } from '../../shared/models/api-response.model';
+import { SessionScopedState } from '../../shared/state/session-scoped-state';
 import { PrintHistoryFilterDto, PrintHistoryItemDto } from '../models/printing.models';
 import { PrintingService } from '../services/printing.service';
 
@@ -15,7 +16,7 @@ const DEFAULT_PAGE_SIZE = 20;
  * que el historial es una consulta con filtros que el usuario refina.
  */
 @Injectable({ providedIn: 'root' })
-export class HistoryFacade {
+export class HistoryFacade implements SessionScopedState {
   private readonly printingService = inject(PrintingService);
 
   private readonly itemsSignal = signal<PrintHistoryItemDto[]>([]);
@@ -98,6 +99,21 @@ export class HistoryFacade {
   clearFilters(): void {
     this.filterSignal.set({ page: 1, pageSize: DEFAULT_PAGE_SIZE });
     this.load();
+  }
+
+  /**
+   * Descarta el estado de la sesion anterior.
+   *
+   * Es el caso mas delicado: las filas cargadas pueden ser el historial completo de
+   * la tienda que consulto un supervisor, y un operario solo puede ver el suyo.
+   */
+  resetForNewSession(): void {
+    this.itemsSignal.set([]);
+    this.metaSignal.set(null);
+    this.errorSignal.set(null);
+    this.loadingSignal.set(false);
+    this.loadedSignal.set(false);
+    this.filterSignal.set({ page: 1, pageSize: DEFAULT_PAGE_SIZE });
   }
 
   /** Ejecuta la consulta con los filtros vigentes. */

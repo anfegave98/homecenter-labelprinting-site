@@ -2,6 +2,10 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, finalize, tap } from 'rxjs';
 
+import {
+  SESSION_SCOPED_STATE,
+  SessionScopedState
+} from '../../shared/state/session-scoped-state';
 import { AuthUserDto, LoginRequestDto, LoginResponseDto, RoleName } from '../models/auth.models';
 import { AuthService } from '../services/auth.service';
 import { TokenStorageService } from '../services/token-storage.service';
@@ -17,6 +21,13 @@ export class AuthFacade {
   private readonly authService = inject(AuthService);
   private readonly tokenStorage = inject(TokenStorageService);
   private readonly router = inject(Router);
+
+  /**
+   * Estado de otras funcionalidades que muere con la sesion. Se resuelve por token
+   * para que autenticacion no dependa de impresion ni de historial.
+   */
+  private readonly sessionScopedState: readonly SessionScopedState[] =
+    inject(SESSION_SCOPED_STATE, { optional: true }) ?? [];
 
   private readonly userSignal = signal<AuthUserDto | null>(this.tokenStorage.getUser());
   private readonly loadingSignal = signal(false);
@@ -60,6 +71,11 @@ export class AuthFacade {
 
     return this.authService.login(dto).pipe(
       tap((response) => {
+        // Se limpia al abrir y no solo al cerrar: una sesion tambien termina cuando el
+        // interceptor recibe un 401, y ese camino no pasa por logout(). Limpiar aqui
+        // cubre toda forma de entrar a una sesion nueva.
+        this.clearSessionScopedState();
+
         this.tokenStorage.save(response.accessToken, response.user, response.expiresIn);
         this.userSignal.set(response.user);
       }),
@@ -71,6 +87,20 @@ export class AuthFacade {
   logout(): void {
     this.tokenStorage.clear();
     this.userSignal.set(null);
+    this.clearSessionScopedState();
     void this.router.navigate(['/login']);
+  }
+
+  /**
+   * Descarta el estado de las funcionalidades.
+   *
+   * Sin esto, la ETQ consultada, el resultado de la impresion y las filas del
+   * historial sobreviven al cierre de sesion y los ve quien entre despues: las
+   * fachadas son singletons de raiz, viven mientras viva la pestaña.
+   */
+  private clearSessionScopedState(): void {
+    for (const state of this.sessionScopedState) {
+      state.resetForNewSession();
+    }
   }
 }

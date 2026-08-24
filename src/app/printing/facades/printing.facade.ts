@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApiError } from '../../shared/models/api-response.model';
+import { SessionScopedState } from '../../shared/state/session-scoped-state';
 import {
   LabelDetailDto,
   PrintRequestCreateDto,
@@ -18,7 +19,7 @@ import { PrintingService } from '../services/printing.service';
  * operario" ocurre en un solo lugar.
  */
 @Injectable({ providedIn: 'root' })
-export class PrintingFacade {
+export class PrintingFacade implements SessionScopedState {
   private readonly catalogService = inject(CatalogService);
   private readonly printingService = inject(PrintingService);
 
@@ -126,6 +127,18 @@ export class PrintingFacade {
     this.labelSignal.set(null);
     this.labelErrorSignal.set(null);
     this.clearResult();
+  }
+
+  /**
+   * Descarta el estado de la sesion anterior.
+   *
+   * Incluye el catalogo de zonas: aunque es comun a todos los usuarios, dejarlo
+   * cargado haria que la pantalla se pintara con datos traidos con un token que ya
+   * no vale. Volver a pedirlo cuesta una peticion y elimina la ambiguedad.
+   */
+  resetForNewSession(): void {
+    this.zonesSignal.set([]);
+    this.reset();
   }
 
   private markLabelAsPrinted(): void {

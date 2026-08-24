@@ -1,0 +1,136 @@
+<section class="flex flex-col gap-5">
+  <header class="flex flex-col gap-1">
+    <h1 class="m-0 text-2xl font-black tracking-tight text-hc-blue-title">
+      Autorización de reimpresiones
+    </h1>
+    <p class="m-0 text-sm text-hc-muted">
+      Solicitudes enviadas por personal operativo sobre etiquetas que ya fueron impresas.
+      Se atienden de la más antigua a la más reciente.
+    </p>
+  </header>
+
+  @if (approvals.outcome(); as outcome) {
+    @if (approvals.outcomeError()) {
+      <app-alert tone="warning" [title]="'Sin imprimir · ' + approvals.outcomeError()!.code">
+        {{ approvals.outcomeError()!.message }}
+      </app-alert>
+    } @else {
+      <app-alert tone="success" title="Reimpresión autorizada">
+        La etiqueta {{ outcome.etqId }} del LPN {{ outcome.lpnId }} se envió a impresión.
+      </app-alert>
+    }
+  } @else if (approvals.outcomeError(); as decisionError) {
+    <app-alert tone="error" [title]="'No fue posible resolver la solicitud · ' + decisionError.code">
+      {{ decisionError.message }}
+    </app-alert>
+  }
+
+  @if (approvals.error(); as error) {
+    <app-alert tone="error" title="No fue posible consultar las solicitudes pendientes">
+      {{ error.message }}
+    </app-alert>
+  }
+
+  <div class="hc-card overflow-hidden">
+    @if (approvals.loading()) {
+      <div class="px-4 py-12">
+        <app-brand-loader label="Consultando solicitudes pendientes" [markSize]="58" />
+      </div>
+    } @else if (approvals.isEmpty()) {
+      <div class="p-4">
+        <app-empty-state
+          title="No hay solicitudes pendientes"
+          description="Cuando alguien del equipo operativo pida una reimpresión, aparecerá aquí."
+        />
+      </div>
+    } @else {
+      <ul class="divide-y divide-hc-hairline">
+        @for (item of approvals.items(); track item.id) {
+          <li class="px-4 py-4 sm:px-5">
+            <div class="flex flex-wrap items-center gap-2">
+              <app-badge tone="warning">Reimpresión</app-badge>
+              <span class="text-sm font-bold text-hc-ink">{{ item.lpnId }}</span>
+              @if (item.etqId) {
+                <span class="text-sm text-hc-muted">· {{ item.etqId }}</span>
+              }
+              <span class="ml-auto text-xs text-hc-faint">
+                {{ item.processedAt | date: 'dd/MM/yyyy HH:mm' }}
+              </span>
+            </div>
+
+            <dl class="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-3">
+              <div>
+                <dt class="text-xs uppercase tracking-wide text-hc-faint">Solicitante</dt>
+                <dd class="text-sm font-medium text-hc-ink">{{ item.userName }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase tracking-wide text-hc-faint">Zona</dt>
+                <dd class="text-sm font-medium text-hc-ink">{{ item.zoneCode ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase tracking-wide text-hc-faint">Documento</dt>
+                <dd class="text-sm font-medium text-hc-ink">{{ item.documentNumber ?? '—' }}</dd>
+              </div>
+            </dl>
+
+            <!--
+              El motivo del operario se muestra destacado y no como un dato más: es lo
+              único con lo que el supervisor puede decidir.
+            -->
+            <div class="mt-3 rounded-[10px] bg-hc-surface px-4 py-3">
+              <p class="text-xs uppercase tracking-wide text-hc-faint">Motivo informado</p>
+              <p class="mt-0.5 text-sm text-hc-ink">{{ item.reprintReason ?? '—' }}</p>
+            </div>
+
+            <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+              <label class="flex-1">
+                <span class="hc-label">Comentario de la decisión</span>
+                <input
+                  type="text"
+                  class="hc-input"
+                  maxlength="300"
+                  placeholder="Obligatorio para negar"
+                  [ngModel]="noteFor(item.id)"
+                  (ngModelChange)="setNote(item.id, $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  [disabled]="approvals.deciding() !== null"
+                />
+              </label>
+
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  class="h-11 rounded-[9px] bg-hc-blue px-5 text-sm font-bold text-white transition
+                         hover:bg-hc-blue-hover disabled:cursor-not-allowed disabled:opacity-40"
+                  [disabled]="approvals.deciding() !== null"
+                  (click)="approve(item.id)"
+                >
+                  {{ approvals.deciding() === item.id ? 'Procesando…' : 'Autorizar' }}
+                </button>
+
+                <button
+                  type="button"
+                  class="h-11 rounded-[9px] border-[1.5px] border-hc-border px-5 text-sm font-bold text-hc-danger-strong
+                         transition hover:border-hc-danger disabled:cursor-not-allowed disabled:opacity-40"
+                  [disabled]="approvals.deciding() !== null || noteFor(item.id).trim().length === 0"
+                  (click)="reject(item.id)"
+                >
+                  Negar
+                </button>
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <app-pagination
+        [page]="approvals.page()"
+        [pageSize]="approvals.pageSize()"
+        [total]="approvals.total()"
+        [totalPages]="approvals.totalPages()"
+        [disabled]="approvals.loading()"
+        (pageChange)="approvals.goToPage($event)"
+      />
+    }
+  </div>
+</section>

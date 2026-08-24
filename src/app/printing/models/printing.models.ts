@@ -63,10 +63,17 @@ export interface LegacyEtqResponseDto {
   hasMultipleProducts: boolean;
 }
 
-/** Resultado del procesamiento de la solicitud, aprobado o rechazado. */
+/**
+ * Resultado del procesamiento de la solicitud.
+ *
+ * Son tres desenlaces y no dos: una reimpresion pedida por alguien sin rol autorizado
+ * no se rechaza, queda esperando la decision de un supervisor.
+ */
 export interface PrintResultDto {
   correlationId: string;
-  result: 'APPROVED' | 'REJECTED';
+  /** Identificador en la auditoria. Es la llave con la que se aprueba o niega despues. */
+  requestId?: number | null;
+  result: 'APPROVED' | 'REJECTED' | 'PENDING_APPROVAL';
   eventType: 'PRINT' | 'REPRINT';
   etqId?: string | null;
   lpnId: string;
@@ -78,6 +85,16 @@ export interface PrintResultDto {
   zpl?: string | null;
   products?: ProductAvailabilityDto[] | null;
   legacy?: LegacyEtqResponseDto | null;
+  /** Supervisor o Admin que resolvio la reimpresion. Null mientras siga pendiente. */
+  approvedBy?: string | null;
+  decidedAt?: string | null;
+  approvalNote?: string | null;
+}
+
+/** Decision de un autorizador sobre una reimpresion pendiente. */
+export interface ReprintDecisionDto {
+  /** Comentario del autorizador. Obligatorio al negar. */
+  note?: string | null;
 }
 
 /** Detalle por producto que acompana un rechazo de inventario. */
@@ -105,6 +122,9 @@ export interface PrintHistoryItemDto {
   rejectionMessage?: string | null;
   reprintReason?: string | null;
   processedAt: string;
+  approvedBy?: string | null;
+  decidedAt?: string | null;
+  approvalNote?: string | null;
 }
 
 /** Filtros y paginacion del historial. */

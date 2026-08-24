@@ -23,12 +23,22 @@ export class HistoryTableComponent {
 
   /** Tono del badge de resultado. */
   protected resultTone(result: string): BadgeTone {
-    return result === 'APPROVED' ? 'success' : 'danger';
+    if (result === 'APPROVED') {
+      return 'success';
+    }
+
+    // Una solicitud pendiente no es un fallo: pintarla de rojo junto a los rechazos
+    // haria creer que ya se decidio en contra.
+    return result === 'PENDING_APPROVAL' ? 'warning' : 'danger';
   }
 
   /** Etiqueta legible del resultado. */
   protected resultLabel(result: string): string {
-    return result === 'APPROVED' ? 'Aprobada' : 'Rechazada';
+    if (result === 'APPROVED') {
+      return 'Aprobada';
+    }
+
+    return result === 'PENDING_APPROVAL' ? 'Pendiente' : 'Rechazada';
   }
 
   /** Etiqueta legible del tipo de evento. */

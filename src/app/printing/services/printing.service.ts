@@ -9,7 +9,8 @@ import {
   PrintHistoryFilterDto,
   PrintHistoryItemDto,
   PrintRequestCreateDto,
-  PrintResultDto
+  PrintResultDto,
+  ReprintDecisionDto
 } from '../models/printing.models';
 
 /** Transporte HTTP del flujo de impresion. */
@@ -43,6 +44,38 @@ export class PrintingService {
     return this.http.post<ApiResponse<PrintResultDto>>(
       `${environment.apiUrl}/print-requests`,
       dto
+    );
+  }
+
+  /** Consulta la bandeja de reimpresiones pendientes de autorizacion. */
+  getPending(page: number, pageSize: number): Observable<ApiResponse<PrintHistoryItemDto[]>> {
+    const params = new HttpParams().set('page', page).set('pageSize', pageSize);
+
+    return this.http.get<ApiResponse<PrintHistoryItemDto[]>>(
+      `${environment.apiUrl}/print-requests/pending`,
+      { params }
+    );
+  }
+
+  /**
+   * Autoriza una reimpresion pendiente.
+   *
+   * Devuelve el envelope completo porque aprobar no garantiza imprimir: si el
+   * inventario se agoto mientras la solicitud esperaba, la respuesta llega con
+   * `success: false` y el motivo real en `error`.
+   */
+  approve(id: number, decision: ReprintDecisionDto): Observable<ApiResponse<PrintResultDto>> {
+    return this.http.post<ApiResponse<PrintResultDto>>(
+      `${environment.apiUrl}/print-requests/${id}/approve`,
+      decision
+    );
+  }
+
+  /** Niega una reimpresion pendiente. El motivo es obligatorio. */
+  reject(id: number, decision: ReprintDecisionDto): Observable<ApiResponse<PrintResultDto>> {
+    return this.http.post<ApiResponse<PrintResultDto>>(
+      `${environment.apiUrl}/print-requests/${id}/reject`,
+      decision
     );
   }
 

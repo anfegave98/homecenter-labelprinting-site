@@ -4,6 +4,12 @@
       <app-alert tone="success" title="Impresión registrada">
         La etiqueta {{ result()!.etqId }} se envió a impresión correctamente.
       </app-alert>
+    } @else if (pending()) {
+      <app-alert tone="warning" title="Enviada para autorización">
+        Esta etiqueta ya fue impresa antes, así que la reimpresión requiere el visto bueno
+        de un supervisor. Tu solicitud quedó registrada con el motivo que indicaste y
+        aparecerá en el historial cuando se resuelva.
+      </app-alert>
     } @else {
       <app-alert tone="error" [title]="'Solicitud rechazada · ' + rejection()!.code">
         {{ rejection()!.message }}
@@ -34,8 +40,8 @@
     @if (result(); as printResult) {
       <div class="hc-card">
         <header class="flex flex-wrap items-center gap-2 border-b border-hc-hairline px-4 py-3">
-          <app-badge [tone]="approved() ? 'success' : 'danger'">
-            {{ approved() ? 'Aprobada' : 'Rechazada' }}
+          <app-badge [tone]="approved() ? 'success' : pending() ? 'warning' : 'danger'">
+            {{ approved() ? 'Aprobada' : pending() ? 'Pendiente' : 'Rechazada' }}
           </app-badge>
           <app-badge [tone]="isReprint() ? 'warning' : 'info'">
             {{ isReprint() ? 'Reimpresión' : 'Impresión' }}

@@ -37,8 +37,8 @@ El build sale en `dist/homecenter-labelprinting-site/browser`.
 
 | Usuario | Contraseña | Puede |
 |---|---|---|
-| `operario.tienda` | `Operario123*` | Imprimir y ver **su propio** historial |
-| `supervisor.tienda` | `Supervisor123*` | Además: reimprimir con motivo, ver todo el historial |
+| `operario.tienda` | `Operario123*` | Imprimir, **solicitar** reimpresión con motivo y ver **su propio** historial |
+| `supervisor.tienda` | `Supervisor123*` | Además: reimprimir directo, **autorizar** las solicitudes pendientes y ver todo el historial |
 | `admin.tienda` | `Admin123*` | Además: indicadores operativos |
 
 ---
@@ -49,10 +49,15 @@ El build sale en `dist/homecenter-labelprinting-site/browser`.
 y disponibilidad, y resultado como banner de **Éxito / Rechazo + motivo** con badge
 `Impresión` o `Reimpresión`.
 
+**`/aprobaciones`** — bandeja de reimpresiones pendientes, ordenada de la más antigua a
+la más reciente. Cada solicitud muestra el motivo que escribió quien la pidió, que es lo
+único con lo que el autorizador decide. Solo `Supervisor` y `Admin` (`roleGuard`).
+
 **`/historial`** — filtros por LPN, zona, usuario, resultado, tipo de evento y rango de
 fechas, con paginación. Tabla en escritorio, tarjetas en móvil.
 
-Ambas exigen sesión (`authGuard`).
+Todas exigen sesión (`authGuard`); el guard de rol solo evita mostrar una pantalla
+inútil, la autorización vinculante está en el backend.
 
 ---
 

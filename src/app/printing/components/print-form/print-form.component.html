@@ -70,34 +70,38 @@
   </div>
 
   @if (requiresReprintReason()) {
-    @if (canReprint()) {
-      <div>
-        <label class="hc-label" for="reprintReason">
-          Motivo de reimpresión <span class="text-hc-danger">*</span>
-        </label>
-        <textarea
-          id="reprintReason"
-          rows="3"
-          formControlName="reprintReason"
-          placeholder="Ej.: etiqueta dañada en el traslado"
-          class="hc-input h-auto resize-none py-3 leading-relaxed"
-        ></textarea>
-        @if (form.controls.reprintReason.touched && form.controls.reprintReason.invalid) {
-          <p class="mt-1.5 text-xs font-bold leading-relaxed text-hc-danger">
-            Esta ETQ ya fue impresa: el motivo de la reimpresión es obligatorio.
-          </p>
-        } @else {
-          <p class="mt-1.5 text-xs leading-relaxed text-hc-faint">
-            Queda registrado en la auditoría junto a tu usuario.
-          </p>
-        }
-      </div>
-    } @else {
+    @if (!canReprint()) {
       <app-alert tone="warning" title="Esta ETQ ya fue impresa">
-        Reimprimir requiere rol Supervisor o Administrador. Solicita la autorización antes de
-        continuar.
+        Puedes solicitar la reimpresión explicando el motivo. Un supervisor la revisará y
+        decidirá; no se imprime nada hasta entonces.
       </app-alert>
     }
+
+    <div>
+      <label class="hc-label" for="reprintReason">
+        Motivo de reimpresión <span class="text-hc-danger">*</span>
+      </label>
+      <textarea
+        id="reprintReason"
+        rows="3"
+        formControlName="reprintReason"
+        placeholder="Ej.: etiqueta dañada en el traslado"
+        class="hc-input h-auto resize-none py-3 leading-relaxed"
+      ></textarea>
+      @if (form.controls.reprintReason.touched && form.controls.reprintReason.invalid) {
+        <p class="mt-1.5 text-xs font-bold leading-relaxed text-hc-danger">
+          Esta ETQ ya fue impresa: el motivo de la reimpresión es obligatorio.
+        </p>
+      } @else if (canReprint()) {
+        <p class="mt-1.5 text-xs leading-relaxed text-hc-faint">
+          Queda registrado en la auditoría junto a tu usuario.
+        </p>
+      } @else {
+        <p class="mt-1.5 text-xs leading-relaxed text-hc-faint">
+          Es lo único que verá el supervisor para decidir: sé concreto.
+        </p>
+      }
+    </div>
   }
 
   <div class="flex flex-col gap-2.5 border-t border-hc-hairline pt-5">
@@ -123,7 +127,7 @@
           <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
           <polyline points="21 3 21 9 15 9"></polyline>
         </svg>
-        Reimprimir etiqueta
+        {{ canReprint() ? 'Reimprimir etiqueta' : 'Solicitar reimpresión' }}
       } @else {
         <svg
           class="h-[19px] w-[19px]"

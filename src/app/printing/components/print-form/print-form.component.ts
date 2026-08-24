@@ -35,7 +35,12 @@ export class PrintFormComponent {
   /** Indica si la ETQ consultada ya fue impresa antes. */
   readonly requiresReprintReason = input(false);
 
-  /** Indica si el rol del usuario permite reimprimir. */
+  /**
+   * Indica si el rol del usuario reimprime directamente.
+   *
+   * Cuando es falso la solicitud no se bloquea: se envia a autorizacion de un
+   * supervisor, y lo unico que cambia es el aviso y el texto del boton.
+   */
   readonly canReprint = input(false);
 
   /** Indica si hay una etiqueta resuelta lista para imprimir. */
@@ -62,7 +67,10 @@ export class PrintFormComponent {
     // Exigirlo siempre convertiria un control de excepcion en friccion diaria.
     effect(() => {
       const control = this.form.controls.reprintReason;
-      const required = this.requiresReprintReason() && this.canReprint();
+
+      // El motivo se exige a todos, no solo a quien puede autorizar: para el operario
+      // es lo unico que el supervisor tendra para decidir cuando abra la bandeja.
+      const required = this.requiresReprintReason();
 
       control.setValidators(
         required

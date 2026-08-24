@@ -28,6 +28,14 @@ export class PrintResultComponent {
   /** Indica si la solicitud fue aprobada. */
   protected readonly approved = computed(() => this.rejection() === null && this.result() !== null);
 
+  /**
+   * Indica que la solicitud quedo esperando autorizacion.
+   *
+   * Se distingue del rechazo a proposito: al operario le cambia lo que debe hacer.
+   * Ante un rechazo corrige y reintenta; aqui no tiene nada que corregir, solo esperar.
+   */
+  protected readonly pending = computed(() => this.result()?.result === 'PENDING_APPROVAL');
+
   /** Indica si el evento corresponde a una reimpresion. */
   protected readonly isReprint = computed(() => this.result()?.eventType === 'REPRINT');
 

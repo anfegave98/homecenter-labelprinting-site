@@ -58,7 +58,11 @@ export class PrintFormComponent {
   /** Formulario de la solicitud. */
   protected readonly form = this.formBuilder.nonNullable.group({
     lpn: ['', [Validators.required, Validators.maxLength(50)]],
-    zoneCode: [''],
+    // Obligatoria aunque el API la acepte vacía. La zona decide contra qué stock se
+    // valida, y es dato que solo tiene quien está en el piso: un valor por defecto la
+    // convertiría en una suposición del sistema, y el operario recibiría un rechazo
+    // correcto pero incomprensible por una zona que nunca eligió.
+    zoneCode: ['', [Validators.required]],
     reprintReason: ['', [Validators.maxLength(300)]]
   });
 
@@ -81,16 +85,23 @@ export class PrintFormComponent {
     });
   }
 
-  /** Emite la consulta de la etiqueta. */
+  /**
+   * Emite la consulta de la etiqueta.
+   *
+   * También exige la zona: el preview muestra disponibilidad por zona, y resolverlo sin
+   * ella enseñaría el stock de una zona que el operario no eligió.
+   */
   protected resolve(): void {
-    const lpnControl = this.form.controls.lpn;
-    if (lpnControl.invalid) {
+    const { lpn: lpnControl, zoneCode: zoneControl } = this.form.controls;
+
+    if (lpnControl.invalid || zoneControl.invalid) {
       lpnControl.markAsTouched();
+      zoneControl.markAsTouched();
       return;
     }
 
     const { lpn, zoneCode } = this.form.getRawValue();
-    this.resolveLabel.emit({ lpn: lpn.trim(), zoneCode: zoneCode || null });
+    this.resolveLabel.emit({ lpn: lpn.trim(), zoneCode });
   }
 
   /** Emite la solicitud de impresion. */
@@ -104,7 +115,7 @@ export class PrintFormComponent {
 
     this.submitPrint.emit({
       lpn: lpn.trim(),
-      zoneCode: zoneCode || null,
+      zoneCode,
       reprintReason: this.requiresReprintReason() ? reprintReason.trim() || null : null
     });
   }

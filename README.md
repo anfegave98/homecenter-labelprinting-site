@@ -49,6 +49,13 @@ El build sale en `dist/homecenter-labelprinting-site/browser`.
 y disponibilidad, y resultado como banner de **Éxito / Rechazo + motivo** con badge
 `Impresión` o `Reimpresión`.
 
+La **zona es obligatoria aquí aunque el API la acepte vacía**. No es una inconsistencia:
+el contrato debe seguir aceptando `{ "lpn": "..." }` a secas porque así llega el anexo
+`requetEtq.json`, pero en la interfaz hay una persona que sabe dónde está parada. La zona
+decide contra qué stock se valida —el mismo LPN aprueba en `ZONA-PICKING-A` y se rechaza
+en `ZONA-PICKING-B`— y un valor por defecto la convertiría en una suposición del sistema,
+con el operario recibiendo un rechazo correcto pero incomprensible.
+
 **`/aprobaciones`** — bandeja de reimpresiones pendientes, ordenada de la más antigua a
 la más reciente. Cada solicitud muestra el motivo que escribió quien la pidió, que es lo
 único con lo que el autorizador decide. Solo `Supervisor` y `Admin` (`roleGuard`).

@@ -27,16 +27,28 @@
     </div>
 
     <div>
-      <label class="hc-label" for="zoneCode">Zona</label>
+      <label class="hc-label" for="zoneCode">
+        Zona <span class="text-hc-danger">*</span>
+      </label>
+      <!--
+        La opción vacía va deshabilitada: es un marcador de posición, no una elección.
+        Dejarla seleccionable permitiría volver a "sin zona" después de haber elegido.
+      -->
       <select id="zoneCode" formControlName="zoneCode" class="hc-input">
-        <option value="">Zona del documento origen</option>
+        <option value="" disabled>Selecciona la zona</option>
         @for (zone of zones(); track zone.id) {
           <option [value]="zone.code">{{ zone.name }} ({{ zone.code }})</option>
         }
       </select>
-      <p class="mt-1.5 text-xs leading-relaxed text-hc-faint">
-        Si no seleccionas zona, se usa la del documento origen.
-      </p>
+      @if (form.controls.zoneCode.touched && form.controls.zoneCode.invalid) {
+        <p class="mt-1.5 text-xs font-bold leading-relaxed text-hc-danger">
+          Indica desde qué zona estás surtiendo: la disponibilidad se valida contra ella.
+        </p>
+      } @else {
+        <p class="mt-1.5 text-xs leading-relaxed text-hc-faint">
+          La disponibilidad se valida contra esta zona, no contra el total de la tienda.
+        </p>
+      }
     </div>
 
     <div>

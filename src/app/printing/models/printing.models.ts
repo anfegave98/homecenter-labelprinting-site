@@ -125,6 +125,14 @@ export interface PrintHistoryItemDto {
   approvedBy?: string | null;
   decidedAt?: string | null;
   approvalNote?: string | null;
+  /** Momento en que se descargó la etiqueta. Null si sigue disponible. */
+  downloadedAt?: string | null;
+}
+
+/** Archivo de etiqueta recibido del API, listo para entregar al usuario. */
+export interface LabelFileDto {
+  blob: Blob;
+  fileName: string;
 }
 
 /** Filtros y paginacion del historial. */

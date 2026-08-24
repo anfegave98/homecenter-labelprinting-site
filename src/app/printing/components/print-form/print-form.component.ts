@@ -46,6 +46,15 @@ export class PrintFormComponent {
   /** Indica si hay una etiqueta resuelta lista para imprimir. */
   readonly hasLabel = input(false);
 
+  /**
+   * Indica que hay una etiqueta aprobada esperando descarga.
+   *
+   * Mientras exista, imprimir de nuevo se bloquea: la tarea pendiente es bajar el
+   * archivo, y una segunda solicitud sin motivo la rechazaría el backend como
+   * reimpresión sin justificar.
+   */
+  readonly pendingDownload = input(false);
+
   /** Indica si hay una operacion en curso. */
   readonly busy = input(false);
 

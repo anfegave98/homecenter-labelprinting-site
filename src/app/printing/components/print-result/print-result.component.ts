@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 import { ApiError } from '../../../shared/models/api-response.model';
 import { AlertComponent } from '../../../shared/ui/alert.component';
@@ -24,6 +24,15 @@ export class PrintResultComponent {
 
   /** Motivo del rechazo o del fallo tecnico. */
   readonly rejection = input<ApiError | null>(null);
+
+  /** Indica si hay una descarga en curso. */
+  readonly downloading = input(false);
+
+  /** Motivo por el cual no se pudo entregar la etiqueta. */
+  readonly downloadError = input<ApiError | null>(null);
+
+  /** Solicita la entrega del archivo de la etiqueta. */
+  readonly download = output<void>();
 
   /** Indica si la solicitud fue aprobada. */
   protected readonly approved = computed(() => this.rejection() === null && this.result() !== null);

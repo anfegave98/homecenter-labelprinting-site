@@ -1,11 +1,13 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, switchMap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../../shared/models/api-response.model';
+import { fileNameFromDisposition } from '../../shared/utils/file-download.util';
 import {
   LabelDetailDto,
+  LabelFileDto,
   PrintHistoryFilterDto,
   PrintHistoryItemDto,
   PrintRequestCreateDto,
@@ -47,6 +49,41 @@ export class PrintingService {
     );
   }
 
+  /**
+   * Descarga la etiqueta de una solicitud aprobada.
+   *
+   * El endpoint responde de dos formas distintas: el archivo cuando procede y el
+   * envelope cuando no. Se pide siempre como blob —no se puede saber cuál llegará antes
+   * de recibirla— y si el tipo de contenido es JSON se lee el blob como texto para
+   * recuperar el motivo y emitirlo como error.
+   */
+  downloadLabel(id: number): Observable<LabelFileDto> {
+    return this.http
+      .get(`${environment.apiUrl}/print-requests/${id}/label`, {
+        observe: 'response',
+        responseType: 'blob'
+      })
+      .pipe(
+        switchMap((response) => {
+          const body = response.body as Blob;
+
+          if (body.type.includes('json')) {
+            return this.rejectionFrom(body);
+          }
+
+          return [
+            {
+              blob: body,
+              fileName: fileNameFromDisposition(
+                response.headers.get('Content-Disposition'),
+                `etiqueta-${id}.zpl`
+              )
+            }
+          ];
+        })
+      );
+  }
+
   /** Consulta la bandeja de reimpresiones pendientes de autorizacion. */
   getPending(page: number, pageSize: number): Observable<ApiResponse<PrintHistoryItemDto[]>> {
     const params = new HttpParams().set('page', page).set('pageSize', pageSize);
@@ -76,6 +113,31 @@ export class PrintingService {
     return this.http.post<ApiResponse<PrintResultDto>>(
       `${environment.apiUrl}/print-requests/${id}/reject`,
       decision
+    );
+  }
+
+  /** Traduce un envelope recibido como blob al error que espera el consumidor. */
+  private rejectionFrom(body: Blob): Observable<never> {
+    return new Observable<string>((subscriber) => {
+      body
+        .text()
+        .then((text) => {
+          subscriber.next(text);
+          subscriber.complete();
+        })
+        .catch((error: unknown) => subscriber.error(error));
+    }).pipe(
+      switchMap((text) => {
+        const envelope = JSON.parse(text) as ApiResponse<unknown>;
+
+        return throwError(
+          () =>
+            envelope.error ?? {
+              code: 'UNKNOWN',
+              message: 'No fue posible descargar la etiqueta.'
+            }
+        );
+      })
     );
   }
 

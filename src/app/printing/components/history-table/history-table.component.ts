@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 import { BadgeComponent, BadgeTone } from '../../../shared/ui/badge.component';
 import { PrintHistoryItemDto } from '../../models/printing.models';
@@ -20,6 +20,22 @@ import { PrintHistoryItemDto } from '../../models/printing.models';
 export class HistoryTableComponent {
   /** Registros de la pagina actual. */
   readonly items = input.required<PrintHistoryItemDto[]>();
+
+  /** Solicitud cuya etiqueta se esta descargando, si hay alguna. */
+  readonly downloading = input<number | null>(null);
+
+  /** Solicita la entrega del archivo de una solicitud. */
+  readonly download = output<number>();
+
+  /**
+   * Indica si la fila ofrece descarga.
+   *
+   * Solo las aprobadas tienen etiqueta que entregar, y solo una vez: una solicitud
+   * aprobada da derecho a una copia, no a un boton permanente.
+   */
+  protected canDownload(item: PrintHistoryItemDto): boolean {
+    return item.result === 'APPROVED' && !item.downloadedAt;
+  }
 
   /** Tono del badge de resultado. */
   protected resultTone(result: string): BadgeTone {

@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApiError, PagedMeta } from '../../shared/models/api-response.model';
 import { SessionScopedState } from '../../shared/state/session-scoped-state';
+import { saveBlobAs } from '../../shared/utils/file-download.util';
 import { PrintHistoryFilterDto, PrintHistoryItemDto } from '../models/printing.models';
 import { PrintingService } from '../services/printing.service';
 
@@ -25,6 +26,9 @@ export class HistoryFacade implements SessionScopedState {
   private readonly errorSignal = signal<ApiError | null>(null);
   private readonly loadedSignal = signal(false);
 
+  private readonly downloadingSignal = signal<number | null>(null);
+  private readonly downloadErrorSignal = signal<ApiError | null>(null);
+
   private readonly filterSignal = signal<PrintHistoryFilterDto>({
     page: 1,
     pageSize: DEFAULT_PAGE_SIZE
@@ -41,6 +45,12 @@ export class HistoryFacade implements SessionScopedState {
 
   /** Error tecnico de la ultima consulta. */
   readonly error = this.errorSignal.asReadonly();
+
+  /** Solicitud cuya etiqueta se esta descargando, si hay alguna. */
+  readonly downloading = this.downloadingSignal.asReadonly();
+
+  /** Motivo por el cual no se pudo entregar la ultima etiqueta pedida. */
+  readonly downloadError = this.downloadErrorSignal.asReadonly();
 
   /** Filtros aplicados actualmente. */
   readonly filter = this.filterSignal.asReadonly();
@@ -113,7 +123,50 @@ export class HistoryFacade implements SessionScopedState {
     this.errorSignal.set(null);
     this.loadingSignal.set(false);
     this.loadedSignal.set(false);
+    this.downloadingSignal.set(null);
+    this.downloadErrorSignal.set(null);
     this.filterSignal.set({ page: 1, pageSize: DEFAULT_PAGE_SIZE });
+  }
+
+  /**
+   * Descarga la etiqueta de una solicitud del historial.
+   *
+   * Al terminar se marca la fila en memoria en lugar de recargar la pagina completa:
+   * recargar devolveria al operario al inicio del listado y le haria perder el lugar
+   * donde estaba trabajando.
+   */
+  downloadLabel(id: number): void {
+    if (this.downloadingSignal() !== null) {
+      return;
+    }
+
+    this.downloadingSignal.set(id);
+    this.downloadErrorSignal.set(null);
+
+    this.printingService.downloadLabel(id).subscribe({
+      next: (file) => {
+        saveBlobAs(file.blob, file.fileName);
+        this.markAsDownloaded(id);
+        this.downloadingSignal.set(null);
+      },
+      error: (error: ApiError) => {
+        this.downloadErrorSignal.set(error);
+        this.downloadingSignal.set(null);
+      }
+    });
+  }
+
+  /** Descarta el aviso de la ultima descarga fallida. */
+  clearDownloadError(): void {
+    this.downloadErrorSignal.set(null);
+  }
+
+  private markAsDownloaded(id: number): void {
+    this.itemsSignal.update((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, downloadedAt: new Date().toISOString() } : item
+      )
+    );
   }
 
   /** Ejecuta la consulta con los filtros vigentes. */

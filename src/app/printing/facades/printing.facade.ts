@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApiError } from '../../shared/models/api-response.model';
 import { SessionScopedState } from '../../shared/state/session-scoped-state';
+import { saveBlobAs } from '../../shared/utils/file-download.util';
 import {
   LabelDetailDto,
   PrintRequestCreateDto,
@@ -30,6 +31,8 @@ export class PrintingFacade implements SessionScopedState {
   private readonly resultSignal = signal<PrintResultDto | null>(null);
   private readonly rejectionSignal = signal<ApiError | null>(null);
   private readonly printingSignal = signal(false);
+  private readonly downloadingSignal = signal(false);
+  private readonly downloadErrorSignal = signal<ApiError | null>(null);
 
   /** Zonas disponibles para el selector. */
   readonly zones = this.zonesSignal.asReadonly();
@@ -52,8 +55,34 @@ export class PrintingFacade implements SessionScopedState {
   /** Indica si hay una solicitud de impresion en curso. */
   readonly printing = this.printingSignal.asReadonly();
 
-  /** Indica si la etiqueta consultada ya tenia una impresion aprobada previa. */
-  readonly requiresReprintReason = computed(() => this.labelSignal()?.hasPreviousPrint === true);
+  /** Indica si hay una descarga en curso. */
+  readonly downloading = this.downloadingSignal.asReadonly();
+
+  /** Motivo por el cual no se pudo entregar la etiqueta. */
+  readonly downloadError = this.downloadErrorSignal.asReadonly();
+
+  /**
+   * Indica que hay una etiqueta aprobada esperando ser descargada.
+   *
+   * Mientras exista, la tarea del operario es bajarla, no pedir otra impresion.
+   */
+  readonly pendingDownload = computed(() => {
+    const result = this.resultSignal();
+    return result?.result === 'APPROVED' && result.requestId != null;
+  });
+
+  /**
+   * Indica si la solicitud siguiente sobre esta etiqueta seria una reimpresion.
+   *
+   * Se calla mientras haya una descarga pendiente. Recien impresa, la etiqueta figura
+   * como ya impresa —lo esta— y el aviso aparecia de inmediato, regañando al operario
+   * por algo que acababa de hacer bien y cuya tarea siguiente era descargar el archivo.
+   * La regla del backend no cambia: si de verdad vuelve a pedir la impresion, seguira
+   * exigiendo motivo.
+   */
+  readonly requiresReprintReason = computed(
+    () => this.labelSignal()?.hasPreviousPrint === true && !this.pendingDownload()
+  );
 
   /** Carga las zonas una sola vez por sesion. */
   loadZones(): void {
@@ -116,10 +145,41 @@ export class PrintingFacade implements SessionScopedState {
     });
   }
 
+  /**
+   * Descarga la etiqueta de la solicitud recien aprobada.
+   *
+   * Al terminar se limpia la pantalla: la solicitud quedo cerrada y el formulario queda
+   * listo para el siguiente LPN. Dejar el resultado en pantalla con el boton ya
+   * deshabilitado solo invitaria a volver a pulsarlo.
+   */
+  downloadLabel(): void {
+    const requestId = this.resultSignal()?.requestId;
+
+    if (requestId == null || this.downloadingSignal()) {
+      return;
+    }
+
+    this.downloadingSignal.set(true);
+    this.downloadErrorSignal.set(null);
+
+    this.printingService.downloadLabel(requestId).subscribe({
+      next: (file) => {
+        saveBlobAs(file.blob, file.fileName);
+        this.downloadingSignal.set(false);
+        this.reset();
+      },
+      error: (error: ApiError) => {
+        this.downloadErrorSignal.set(error);
+        this.downloadingSignal.set(false);
+      }
+    });
+  }
+
   /** Limpia el resultado visible sin perder la etiqueta consultada. */
   clearResult(): void {
     this.resultSignal.set(null);
     this.rejectionSignal.set(null);
+    this.downloadErrorSignal.set(null);
   }
 
   /** Limpia todo el estado del flujo. */

@@ -12,6 +12,7 @@
         <th scope="col" class="px-4 py-3 font-semibold">Resultado</th>
         <th scope="col" class="px-4 py-3 font-semibold">Evento</th>
         <th scope="col" class="px-4 py-3 font-semibold">Motivo</th>
+        <th scope="col" class="px-4 py-3 font-semibold">Etiqueta</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-hc-hairline">
@@ -39,6 +40,25 @@
               <p class="text-xs text-hc-faint">{{ item.rejectionMessage }}</p>
             } @else if (item.reprintReason) {
               <p class="text-xs text-hc-faint">{{ item.reprintReason }}</p>
+            } @else {
+              <span class="text-hc-disabled">—</span>
+            }
+          </td>
+          <td class="whitespace-nowrap px-4 py-3">
+            @if (canDownload(item)) {
+              <button
+                type="button"
+                [disabled]="downloading() !== null"
+                (click)="download.emit(item.id)"
+                class="h-9 rounded-[9px] border-[1.5px] border-hc-blue px-3 text-xs font-bold text-hc-blue
+                       transition hover:bg-hc-blue-soft disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {{ downloading() === item.id ? 'Descargando…' : 'Descargar' }}
+              </button>
+            } @else if (item.downloadedAt) {
+              <span class="text-xs text-hc-faint">
+                Descargada<br />{{ item.downloadedAt | date: 'dd/MM/yyyy HH:mm' }}
+              </span>
             } @else {
               <span class="text-hc-disabled">—</span>
             }
@@ -82,6 +102,22 @@
           <dd>{{ item.documentNumber ?? '—' }}</dd>
         </div>
       </dl>
+
+      @if (canDownload(item)) {
+        <button
+          type="button"
+          [disabled]="downloading() !== null"
+          (click)="download.emit(item.id)"
+          class="h-10 w-full rounded-[9px] border-[1.5px] border-hc-blue text-xs font-bold text-hc-blue
+                 transition hover:bg-hc-blue-soft disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {{ downloading() === item.id ? 'Descargando…' : 'Descargar etiqueta' }}
+        </button>
+      } @else if (item.downloadedAt) {
+        <p class="text-xs text-hc-faint">
+          Etiqueta descargada el {{ item.downloadedAt | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
+      }
 
       @if (item.rejectionCode) {
         <div class="rounded-lg bg-hc-danger-soft px-3 py-2">

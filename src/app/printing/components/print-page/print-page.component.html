@@ -15,6 +15,7 @@
         [requiresReprintReason]="printing.requiresReprintReason()"
         [canReprint]="auth.canReprint()"
         [hasLabel]="printing.label() !== null"
+        [pendingDownload]="printing.pendingDownload()"
         [busy]="busy()"
         (resolveLabel)="resolve($event)"
         (submitPrint)="print($event)"
@@ -42,7 +43,13 @@
         <app-label-preview [label]="label" />
       }
 
-      <app-print-result [result]="printing.result()" [rejection]="printing.rejection()" />
+      <app-print-result
+        [result]="printing.result()"
+        [rejection]="printing.rejection()"
+        [downloading]="printing.downloading()"
+        [downloadError]="printing.downloadError()"
+        (download)="printing.downloadLabel()"
+      />
 
       @if (printing.printing()) {
         <div class="hc-card px-4 py-10">
